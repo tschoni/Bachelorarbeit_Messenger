@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace MessengerWPF.Models.DbModels
 {
-    public class Key : DbModelBase
+    public enum KeyType
     {
-        public string KeyString { get; set; }
+        MasterKey,
+        IdentityKey
 
-        public KeyType KeyType { get; set; }
-
-        public User AssociatedUser { get; set; }
     }
 }

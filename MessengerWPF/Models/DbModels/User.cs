@@ -12,11 +12,11 @@ namespace MessengerWPF.Models.DbModels
 
         public List<Group> Groups { get; set; }
 
-        public List<Message> SentMessages { get; set; }
+        public List<Message> Messages { get; set; }
 
-        public List<Message> ReceivedMessages { get; set; }
+//        public List<Message> ReceivedMessages { get; set; }
 
-        public List<Message> MyProperty { get; set; }
+        public List<User> Contacts { get; set; }
 
         public List<Key> Keys { get; set; }
     }

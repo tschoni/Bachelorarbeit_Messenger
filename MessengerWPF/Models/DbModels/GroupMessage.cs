@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace MessengerWPF.Models.DbModels
 {
-    public class Key : DbModelBase
+    public abstract class GroupMessage : Message
     {
-        public string KeyString { get; set; }
+        public Group Group { get; set; }
 
-        public KeyType KeyType { get; set; }
-
-        public User AssociatedUser { get; set; }
     }
 }

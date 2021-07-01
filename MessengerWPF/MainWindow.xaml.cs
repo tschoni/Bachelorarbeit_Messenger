@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MessengerWPF.Business;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,22 @@ namespace MessengerWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        static SignalRClient signalRClient = new SignalRClient();
+
         public MainWindow()
         {
             InitializeComponent();
+
+        }
+
+        private void Button1_Click(object sender, RoutedEventArgs e)
+        {
+            if (!signalRClient.IsConnected)
+            {
+                signalRClient.StartAsync().GetAwaiter().GetResult();
+            }
+
+            TextBox1.Text = signalRClient.IsConnected.ToString();
         }
     }
 }

@@ -1,17 +1,16 @@
-﻿using System;
+﻿using MessengerAPI.Models.DbModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace MessengerWPF.Models.DbModels
+namespace MessengerAPI.Models.DTO
 {
-    public class Key : DbModelBase
+    public class PublicKeyDTO
     {
+        public long Id { get; set; }
         public string KeyString { get; set; }
 
         public KeyType KeyType { get; set; }
-
-        public User AssociatedUser { get; set; }
     }
 }

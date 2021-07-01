@@ -8,6 +8,10 @@ namespace MessengerWPF.Models.DbModels
 {
     public abstract class Message : DbModelBase
     {
+        public User Sender { get; set; }
 
+        public MessageState MessageState { get; set; }
+
+        public DateTime TimeStamp { get; set; }
     }
 }
