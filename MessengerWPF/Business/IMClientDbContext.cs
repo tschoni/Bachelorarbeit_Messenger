@@ -12,7 +12,7 @@ namespace MessengerWPF.Business
     /// <summary>
     /// DbContext Klasse für Entitiy Framework core
     /// </summary>
-    class IMClientDbContext : DbContext
+    public class IMClientDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 

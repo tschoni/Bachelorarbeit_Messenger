@@ -14,21 +14,50 @@ namespace MessengerWPF.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         private Group selectedGroup;
-        private ObservableCollection<Group> groups;
+        private ObservableCollection<Group> groups = new ObservableCollection<Group>();
+        private string messageInput;
 
 
+        public MyICommand SendMessageCommand { get; set; }
+        public MyICommand SelectGroupCommand { get; set; }
 
         public MessengerViewModel()
         {
 
+            SendMessageCommand = new MyICommand(OnSendMessage, CanSendMessage);
+            SelectGroupCommand = new MyICommand(OnSelectGroup);
+
         }
 
- 
+        private void OnSelectGroup()
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool CanSendMessage() => selectedGroup == null && messageInput == null;
+
+        private void OnSendMessage()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string MessageInput
+        {
+            get { return messageInput; }
+            set {
+                messageInput = value;
+                RaisePropertyChanged(nameof(MessageInput));
+            }
+        }
 
         public ObservableCollection<Group> Groups
         {
             get { return groups; }
-            set { groups = value; }
+            set 
+            { 
+                groups = value;
+                RaisePropertyChanged(nameof(Groups));
+            }
         }
 
         public Group SelectedGroup

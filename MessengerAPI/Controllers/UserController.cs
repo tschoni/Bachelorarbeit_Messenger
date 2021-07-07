@@ -9,6 +9,7 @@ using MessengerAPI.Business;
 using MessengerAPI.Models.DbModels;
 using AutoMapper;
 using MessengerAPI.Models.DTO;
+using MessengerCommon;
 
 namespace MessengerAPI.Controllers
 {
@@ -27,8 +28,8 @@ namespace MessengerAPI.Controllers
 
 
         // GET: api/User/5
-        [HttpGet("{name}")]
-        public async Task<ActionResult<UserDetailsDTO>> GetUser(string name)
+        [HttpGet(nameof(GetUserByName) + "/{name}")]
+        public async Task<ActionResult<UserDetailsDTO>> GetUserByName(string name)
         {
             var user = await _context.Users.FirstAsync(x => x.Name == name);
 
@@ -40,25 +41,59 @@ namespace MessengerAPI.Controllers
             return mapper.Map<UserDetailsDTO>(user);
         }
 
+        [HttpGet(nameof(GetUserById) + "/{id}")]
+        public async Task<ActionResult<UserDetailsDTO>> GetUserById(long id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return mapper.Map<UserDetailsDTO>(user);
+        }
 
 
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost(nameof(RegisterUser))]
-        public async Task<ActionResult<long>> RegisterUser(UserRegisterDTO registerDTO)
+        public async Task<ActionResult<TokenDTO>> RegisterUser(UserRegisterDTO registerDTO)
         {
             var user = mapper.Map<User>(registerDTO);
+            var number = RandomNumber.GenerateRandomNumber(256);
+            user.UserToken = Convert.ToBase64String(number);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return user.Id;
+            return mapper.Map<TokenDTO>(user);
+        }
+
+        [HttpPost(nameof(LoginUser))]
+        public async Task<ActionResult<TokenDTO>> LoginUser(UserLoginDTO loginDTO)
+        {
+            var user = await _context.Users.FirstAsync(x => x.Name == loginDTO.Name);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            if (user.Password == loginDTO.Password)
+            {
+                return BadRequest("Wrong Password");
+            }
+
+            return mapper.Map<TokenDTO>(user);
         }
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(long id)
+        public async Task<IActionResult> DeleteUser(long id, string userToken)
         {
             var user = await _context.Users.FindAsync(id);
+            if (user.UserToken != userToken)
+            {
+                return BadRequest("Not Authorized");
+            }
             if (user == null)
             {
                 return NotFound();

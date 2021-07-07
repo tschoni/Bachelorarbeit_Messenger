@@ -10,9 +10,10 @@ namespace MessengerCommon
     {
         public long UserId { get; set; }
 
-        // Typ? Zur Gruppe hinzugefügt, entfernt
         public MessageType MessageType { get; set; }
 
-        public long? GroupdId { get; set; }
+        //public long? MessageId { get; set; }
+
+        public long? GroupId { get; set; }
     }
 }

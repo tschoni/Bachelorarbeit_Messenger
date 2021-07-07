@@ -15,14 +15,16 @@ namespace MessengerAPI.Models.DbModels
 
         public string Password { get; set; }
 
-        public List<PublicKey> PublicKeys { get; set; }
+        public string UserToken { get; set; }
 
-        public List<Message> SentMessages { get; set; }
+        public virtual List<PublicKey> PublicKeys { get; set; }
 
-        public List<Message> ReceivedMessages { get; set; }
+        public virtual List<Message> SentMessages { get; set; }
 
-        public List<Group> Groups { get; set; }
+        public virtual List<Message> ReceivedMessages { get; set; }
+
+        public virtual List<Group> Groups { get; set; }
         
-        public List<Group> AdminOfGroups { get; set; }
+        public virtual List<Group> AdminOfGroups { get; set; }
     }
 }

@@ -43,7 +43,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="60"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="MessageInputTextbox"  Grid.Column="0" BorderBrush="DarkCyan"  MaxHeight="80" TextWrapping="Wrap" Margin="10,5,0,5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    <TextBox x:Name="MessageInputTextbox" Text="{Binding Path= MessageInput, Mode=TwoWay}"  Grid.Column="0" BorderBrush="DarkCyan"  MaxHeight="80" TextWrapping="Wrap" Margin="10,5,0,5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
                     <Button x:Name="SendButton" Grid.Column="1" Width="39" Height="39" Background="Azure" BorderBrush="White" Margin="5" HorizontalAlignment="Center">
                         <Border Width="35" Height="35" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
                             <TextBlock Text="&#10148;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Foreground="DarkCyan" FontFamily="Impact"/>

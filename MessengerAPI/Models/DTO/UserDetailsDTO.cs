@@ -9,6 +9,9 @@ namespace MessengerAPI.Models.DTO
     public class UserDetailsDTO
     {
         public long Id { get; set; }
+
+        public string Name { get; set; }
+
         public ICollection<PublicKeyDTO> PublicKeys { get; set; }
     }
 }

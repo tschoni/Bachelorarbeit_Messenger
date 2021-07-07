@@ -34,40 +34,65 @@ namespace MessengerAPI.Controllers
         }
 
         // GET: api/Group/GetGroupDetails/5
-        [HttpGet("GetGroupDetails/{id}")]
-        public async Task<ActionResult<GroupDetailsDTO>> GetGroup(long id)
+        [HttpGet(nameof(GetGroupDetails) + "/{groupId}")]
+        public async Task<ActionResult<GroupDetailsDTO>> GetGroupDetails(long groupId, string token)
         {
-            await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = id });
+            //await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = id });
 
-            var group = await _context.Groups.FindAsync(id);
+            var group = await _context.Groups.FindAsync(groupId);
 
             if (group == null)
             {
                 return NotFound();
             }
-
+            if (!IsMember(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
+            }
             return mapper.Map<GroupDetailsDTO>(group);
         }
 
+        [HttpGet(nameof(GetGroupListByUser))]
+        public async Task<ActionResult<List<long>>> GetGroupListByUser(TokenDTO tokenDTO)
+        {
+            var user = await _context.Users.FindAsync(tokenDTO.UserID);
+            if (user.UserToken != tokenDTO.UserToken) { return BadRequest("Not authorized");}
+            var groupIds = new List<long>();
+            user.Groups.ForEach(x => groupIds.Add(x.Id));
+            return groupIds;//mapper.Map<GroupListDTO>(user.Groups);
+        }
 
         // POST: api/Group/CreateGroup
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("CreateGroup")]
-        public async Task<ActionResult<Group>> PostGroup(GroupDetailsDTO groupDetails)
+        public async Task<ActionResult<long>> PostGroup(GroupDetailsDTO groupDetails, string token)
         {
-
-            // await hubContext.Clients.All.NotifyMessage()
-
-
-            var @group = mapper.Map<Group>(groupDetails);
-            _context.Groups.Add(@group);
+            var group = mapper.Map<Group>(groupDetails);
+            if (!IsAdmin(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
+            }
+/*            if (group.Members.Count <= 1)
+            {
+                return BadRequest("Group must have at least 1 member.");
+            }
+            if (group.Admins.Count <= 1)
+            {
+                return BadRequest("Group must have at least 1 admin.");
+            }*/
+            _context.Groups.Add(group);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGroup", new { id = @group.Id }, @group);
+            foreach( var member in group.Members)
+            {
+                await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupCreated });
+            }
+            
+            return group.Id;//CreatedAtAction("GetGroup", new { id = @group.Id }, @group)
         }
 
-        [HttpPost(nameof(AddGroupMember) + "/{id}")]
-        public async Task<ActionResult<GroupDetailsDTO>> AddGroupMember(long groupId, long userId)
+        [HttpPost(nameof(AddGroupMember) + "/{groupId}/{userId}")]
+        public async Task<ActionResult<GroupDetailsDTO>> AddGroupMember(long groupId, long userId, string token)
         {
             var group = await _context.Groups.FindAsync(groupId);
             var user = await _context.Users.FindAsync(userId);
@@ -75,13 +100,21 @@ namespace MessengerAPI.Controllers
             {
                 return NotFound();
             }
+            if (!IsAdmin(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
+            }
             group.Members.Add(user);
             await _context.SaveChangesAsync();
+            foreach (var member in group.Members)
+            {
+                await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupMemberAdded});
+            }
             return mapper.Map<GroupDetailsDTO>(group);
         }
 
         [HttpPost(nameof(RemoveGroupMember) + "/{groupId}/{userId}")]
-        public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupMember(long groupId, long userId)
+        public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupMember(long groupId, long userId, string token)
         {
             var group = await _context.Groups.FindAsync(groupId);
             var user = group.Members.Find(x => x.Id == userId);
@@ -89,19 +122,31 @@ namespace MessengerAPI.Controllers
             {
                 return NotFound();
             }
+            if (!IsAdmin(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
+            }
             group.Members.Remove(user);
             await _context.SaveChangesAsync();
+            foreach (var member in group.Members)
+            {
+                await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupMemberRemoved });
+            }
             return mapper.Map<GroupDetailsDTO>(group);
         }
 
         [HttpPost(nameof(AddGroupAdmin) + "/{groupId}/{userId}")]
-        public async Task<ActionResult<GroupDetailsDTO>> AddGroupAdmin(long groupId, long userId)
+        public async Task<ActionResult<GroupDetailsDTO>> AddGroupAdmin(long groupId, long userId, string token)
         {
             var group = await _context.Groups.FindAsync(groupId);
             var user = group.Members.Find(x => x.Id == userId);
             if (group == null || user == null)
             {
                 return NotFound();
+            }
+            if (!IsAdmin(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
             }
             if (group.Members.Count <= 1)
             {
@@ -111,12 +156,16 @@ namespace MessengerAPI.Controllers
             {
                 group.Admins.Add(user);
                 await _context.SaveChangesAsync();
+                foreach (var member in group.Members)
+                {
+                    await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupAdminAdded });
+                }
             }
             return mapper.Map<GroupDetailsDTO>(group);
         }
 
         [HttpPost(nameof(RemoveGroupAdmin) + "/{groupId}/{userId}")]
-        public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupAdmin(long groupId, long userId)
+        public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupAdmin(long groupId, long userId, string token)
         {
             var group = await _context.Groups.FindAsync(groupId);
             var user = group.Admins.Find(x => x.Id == userId);
@@ -124,12 +173,20 @@ namespace MessengerAPI.Controllers
             {
                 return NotFound();
             }
+            if (!IsAdmin(group, token).GetAwaiter().GetResult()) 
+            {
+                return BadRequest("Not authorized.");
+            }
             if (group.Admins.Count <= 1)
             {
                 return BadRequest("Group must have at least 1 admin.");
             }
             group.Admins.Remove(user);
             await _context.SaveChangesAsync();
+            foreach (var member in group.Members)
+            {
+                await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupAdminRemoved});
+            }
             return mapper.Map<GroupDetailsDTO>(group);
         }
 
@@ -140,18 +197,44 @@ namespace MessengerAPI.Controllers
         GetGroupDetails 1 */
 
         [HttpDelete(nameof(DeleteGroup) + "/{id}")]
-        public async Task<IActionResult> DeleteGroup(long id)
+        public async Task<IActionResult> DeleteGroup(long id, string token)
         {
-            var @group = await _context.Groups.FindAsync(id);
-            if (@group == null)
+            var group = await _context.Groups.FindAsync(id);
+            if (group == null)
             {
                 return NotFound();
             }
-
-            _context.Groups.Remove(@group);
+            if (!IsAdmin(group, token).GetAwaiter().GetResult())
+            {
+                return BadRequest("Not authorized.");
+            }
+            _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
-
+            foreach (var member in group.Members)
+            {
+                await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = member.Id, GroupId = group.Id, MessageType = MessageType.GroupDeleted });
+            }
             return NoContent();
+        }
+
+        private async Task<bool> IsAdmin(Group group, string token)
+        {
+            var user = await _context.Users.FirstAsync(x => x.UserToken == token);
+            if (group.Admins.Contains(user))
+            {
+                return true;
+            }
+            else { return false;  }
+        }
+
+        private async Task<bool> IsMember(Group group, string token)
+        {
+            var user = await _context.Users.FirstAsync(x => x.UserToken == token);
+            if (group.Members.Contains(user))
+            {
+                return true;
+            }
+            else { return false; }
         }
 
         private bool GroupExists(long id)

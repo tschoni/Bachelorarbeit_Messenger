@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MessengerWPF.Models.DbModels
 {
-    class GroupTextMessage : GroupMessage
+    public class GroupTextMessage : GroupMessage
     {
         public string Text { get; set; }
     }

@@ -12,6 +12,6 @@ namespace MessengerAPI.Models.DTO
 
         public string Password { get; set; }
 
-        public ICollection<PublicKey> PublicKeys { get; set; }
+        public ICollection<PublicKeyDTO> PublicKeys { get; set; }
     }
 }

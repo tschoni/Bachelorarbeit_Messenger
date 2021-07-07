@@ -4,14 +4,16 @@ using MessengerAPI.Business;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MessengerAPI.Migrations
 {
     [DbContext(typeof(IMServerDbContext))]
-    partial class IMServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210705164011_UserToken_added")]
+    partial class UserToken_added
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

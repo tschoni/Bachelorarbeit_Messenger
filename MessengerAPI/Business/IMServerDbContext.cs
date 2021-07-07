@@ -37,6 +37,7 @@ namespace MessengerAPI.Business
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(u => u.Name).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.UserToken).IsUnique();
 
             modelBuilder.Entity<Message>().HasOne(x => x.Sender).WithMany(x => x.SentMessages);
             modelBuilder.Entity<Message>().HasOne(x => x.Recipient).WithMany(x => x.ReceivedMessages);

@@ -1,4 +1,5 @@
-﻿using MessengerWPF.Business;
+﻿using MessengerApiClient;
+using MessengerWPF.Business;
 using MessengerWPF.ViewModels;
 using MessengerWPF.Views;
 using System;
@@ -7,6 +8,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using Unity;
@@ -26,6 +28,14 @@ namespace MessengerWPF
             base.OnStartup(e);
 
             IUnityContainer container = new UnityContainer();
+
+            // TODO Add exception Handler
+            var httpClient = new HttpClient(new HttpClientHandler()
+            {
+                UseDefaultCredentials = true
+            });
+            container.RegisterInstance(new IMApiClient("https://localhost:44384/", httpClient));
+            container.RegisterSingleton<TokenAndIdProvider>();
 
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerAsync();

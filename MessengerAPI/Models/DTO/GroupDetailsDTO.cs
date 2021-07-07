@@ -10,6 +10,8 @@ namespace MessengerAPI.Models.DTO
     {
         public string Name { get; set; }
 
-        public List<User> Members { get; set; }
+        public List<long> MemberIds { get; set; }
+
+        public List<long> AdminIds { get; set; }
     }
 }

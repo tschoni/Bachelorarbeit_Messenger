@@ -8,10 +8,15 @@ namespace MessengerCommon
 {
     public enum MessageType
     {
+        GroupCreated,
         GroupMemberAdded,
         GroupMemberRemoved,
         GroupAdminAdded,
-        GroupAdminRemoved,
+        GroupAdminRemoved,        
+        GroupDeleted,
         MessagePosted
     }
 }
+/*
+GroupChanged,
+*/

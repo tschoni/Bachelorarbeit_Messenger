@@ -8,7 +8,9 @@ namespace MessengerAPI.Models.DTO
 {
     public class MessageSendDTO
     {
-        public User Recipient { get; set; }
+        public long SenderId { get; set; }
+
+        public long RecipientId { get; set; }
 
         public string CipherText { get; set; }
 

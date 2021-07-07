@@ -9,8 +9,8 @@ namespace MessengerAPI.Models.DbModels
     {
         public string Name { get; set; }
 
-        public List<User> Members { get; set; }
+        public virtual List<User> Members { get; set; }
 
-        public List<User> Admins { get; set; }
+        public virtual List<User> Admins { get; set; }
     }
 }

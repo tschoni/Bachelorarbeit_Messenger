@@ -18,6 +18,7 @@ namespace MessengerAPI.Business
                 cfg.CreateMap<Group, GroupDetailsDTO>();
                 cfg.CreateMap<GroupDetailsDTO, Group>();
                 cfg.CreateMap<GroupUpdateNameDTO, Group>();
+
                 /// Mapping for Message Controller
                 cfg.CreateMap<MessageSendDTO, Message>();
                 cfg.CreateMap<Message, MessageReceiveDTO>();
@@ -25,6 +26,7 @@ namespace MessengerAPI.Business
                 cfg.CreateMap<User, UserRegisterDTO>();
                 cfg.CreateMap<UserDetailsDTO, User>();
                 cfg.CreateMap<UserLoginDTO, User>();
+                cfg.CreateMap<User, TokenDTO>();
                 cfg.CreateMap<PublicKey, PublicKeyDTO>();
                 cfg.CreateMap<PublicKeyDTO, PublicKey>();
             });

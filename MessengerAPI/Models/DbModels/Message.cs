@@ -7,9 +7,9 @@ namespace MessengerAPI.Models.DbModels
 {
     public class Message : DbModelBase
     {
-        public User Sender { get; set; }
+        public virtual User Sender { get; set; }
 
-        public User Recipient { get; set; }
+        public virtual User Recipient { get; set; }
 
         public DateTime TimeStamp { get; set; }
 

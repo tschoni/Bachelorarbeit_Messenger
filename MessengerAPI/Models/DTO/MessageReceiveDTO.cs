@@ -8,7 +8,7 @@ namespace MessengerAPI.Models.DTO
 {
     public class MessageReceiveDTO
     {
-        public User Sender { get; set; }
+        public long SenderId { get; set; }
 
         public DateTime TimeStamp { get; set; }
 

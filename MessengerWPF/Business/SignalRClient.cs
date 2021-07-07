@@ -5,15 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MessengerWPF.Business;
 
 namespace MessengerWPF.Business
 {
     public class SignalRClient : IDisposable
     {
         HubConnection hubConnection;
+        private readonly TokenAndIdProvider tokenAndId;
+        private readonly GroupManagementLogic groupManagement;
 
-        public SignalRClient()
+        public SignalRClient(TokenAndIdProvider tokenAndId, GroupManagementLogic groupManagement)
         {
+            this.tokenAndId = tokenAndId;
+            this.groupManagement = groupManagement;
+
             hubConnection = new HubConnectionBuilder()
                  .WithUrl($"https://localhost:44384/signalr")
                 //.WithUrl($"https://asjhasdjhdjkashdjahsd/signalr")
@@ -28,7 +34,30 @@ namespace MessengerWPF.Business
             /**/
             hubConnection.On<NotifyMessage>(nameof(INotificationClient.NotifyMessage), (message) =>
             {
-                
+                if (this.tokenAndId.Id == message.UserId)
+                {
+                    switch (message.MessageType)
+                    {
+                        case MessageType.GroupCreated:
+                        case MessageType.GroupAdminAdded:
+                        case MessageType.GroupAdminRemoved:
+                        case MessageType.GroupMemberAdded:
+                        case MessageType.GroupMemberRemoved:
+                            if (message.GroupId != null)
+                            {
+                                groupManagement.UpdateGroupByIdAsync((long)message.GroupId).GetAwaiter().GetResult();
+                            }                            
+                            break;
+                        case MessageType.GroupDeleted:
+                            if (message.GroupId != null)
+                            {
+                                groupManagement.DeleteGroupAsync((long)message.GroupId).GetAwaiter().GetResult();
+                            }
+                            break;
+                        case MessageType.MessagePosted:
+                            break;
+                    }
+                }
             });
 
         }

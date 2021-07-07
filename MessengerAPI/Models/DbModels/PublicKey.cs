@@ -9,7 +9,7 @@ namespace MessengerAPI.Models.DbModels
     {
         public string KeyString { get; set; }
 
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
 
         public KeyType KeyType { get; set; }
     }
