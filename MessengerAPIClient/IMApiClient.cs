@@ -1755,7 +1755,7 @@ namespace MessengerApiClient
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.4.0 (Newtonsoft.Json v12.0.0.0)")]
-    public enum KeyType
+    public enum PublicKeyType
     {
         [System.Runtime.Serialization.EnumMember(Value = @"IdKey")]
         IdKey = 0,
@@ -1775,11 +1775,11 @@ namespace MessengerApiClient
         public long Id { get; set; }
 
         [Newtonsoft.Json.JsonProperty("keyString", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string KeyString { get; set; }
+        public byte[] KeyString { get; set; }
 
         [Newtonsoft.Json.JsonProperty("keyType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public KeyType KeyType { get; set; }
+        public PublicKeyType KeyType { get; set; }
 
 
     }

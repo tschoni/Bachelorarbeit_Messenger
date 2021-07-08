@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MessengerWPF.Models.DbModels
+namespace SignalRConsole.KEyExchange
 {
     public class Key : DbModelBase
     {

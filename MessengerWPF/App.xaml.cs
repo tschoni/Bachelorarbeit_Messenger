@@ -20,7 +20,7 @@ namespace MessengerWPF
     /// </summary>
     public partial class App : Application
     {
-        static SignalRClient signalRClient = new SignalRClient();
+        //static SignalRClient signalRClient = new SignalRClient();
         static BackgroundWorker worker = new BackgroundWorker();
 
         protected override void OnStartup(StartupEventArgs e)
@@ -50,7 +50,7 @@ namespace MessengerWPF
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            signalRClient.StartAsync().GetAwaiter().GetResult();
+            //signalRClient.StartAsync().GetAwaiter().GetResult();
         }
     }
 }

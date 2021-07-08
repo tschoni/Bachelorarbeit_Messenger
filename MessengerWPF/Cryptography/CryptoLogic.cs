@@ -15,7 +15,7 @@ namespace MessengerWPF.Cryptography
 
         public bool SenderIsValid(long senderId, string mac, string message)
         {
-
+            return true;
         }
 
 

@@ -21,7 +21,7 @@ namespace MessengerWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        static SignalRClient signalRClient = new SignalRClient();
+        //static SignalRClient signalRClient = new SignalRClient();
 
         public MainWindow()
         {
@@ -29,7 +29,7 @@ namespace MessengerWPF
 
         }
 
-        private void Button1_Click(object sender, RoutedEventArgs e)
+        /*private void Button1_Click(object sender, RoutedEventArgs e)
         {
             if (!signalRClient.IsConnected)
             {
@@ -37,6 +37,6 @@ namespace MessengerWPF
             }
 
             TextBox1.Text = signalRClient.IsConnected.ToString();
-        }
+        }*/
     }
 }

@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace MessengerAPI.Models.DbModels
 {
-    public enum KeyType
+    public class SignedKey : PublicKey
     {
-        IdKey,
-        SignedKey,
-        OneTimeKey
+        public byte[] Signature { get; set; }
     }
 }

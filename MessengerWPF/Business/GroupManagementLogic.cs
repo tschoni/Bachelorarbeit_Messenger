@@ -10,7 +10,7 @@ namespace MessengerWPF.Business
 {
     public class GroupManagementLogic : BusinessLogicBase
     {
-        public GroupManagementLogic(IMApiClient apiClient, IMClientDbContext dbContext, TokenAndIdProvider tokenProvider) : base(apiClient, dbContext, tokenProvider)
+        public GroupManagementLogic(IMApiClient apiClient, IMClientDbContext dbContext, TokenAndIdProvider tokenAndId) : base(apiClient, dbContext, tokenAndId)
         {
         }
 

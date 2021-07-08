@@ -10,8 +10,8 @@ namespace MessengerAPI.Models.DTO
     {
         public long Id { get; set; }
 
-        public string KeyString { get; set; }
+        public byte[] KeyString { get; set; }
 
-        public KeyType KeyType { get; set; }
+        public PublicKeyType KeyType { get; set; }
     }
 }

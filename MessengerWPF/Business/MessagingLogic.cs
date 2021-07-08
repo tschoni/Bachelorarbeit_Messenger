@@ -33,13 +33,7 @@ namespace MessengerWPF.Business
             var encryptedMessages = new List<MessageSendDTO>();
             foreach (var message in messages)
             {
-                foreach (var member in message.Group.Members)
-                {
-                    if (member.Id != tokenAndId.Id)
-                    {
 
-                    }
-                }
             }
 
             foreach(var encrypted in encryptedMessages)
@@ -48,15 +42,23 @@ namespace MessengerWPF.Business
             }
         }
 
-        public async Task SendMessage()
+        public async Task SendMessage(GroupTextMessage message)
+        {
+            foreach (var member in message.Group.Members)
+            {
+                if (member.Id != tokenAndId.Id)
+                {
+                    
+                }
+            }
+
+        }
+
+
+        // wahrscheinlich bs
+        public void SaveGroupMessage(string plaintext, long groupId, long senderId, MessageState state)
         {
 
-            var messages = (List<GroupTextMessage>)dbContext.GroupTextMessages.Where(x => x.MessageState == MessageState.Pending && x.Sender.Id == tokenAndId.Id);
-            var encryptedMessages = new List<MessageSendDTO>();
-            foreach (var message in messages)
-            {
-
-            }
         }
 
     }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using MessengerWPF.Cryptography;
 
 namespace MessengerWPF.Business
 {
@@ -31,35 +32,13 @@ namespace MessengerWPF.Business
             var tokenDTO = await apiClient.RegisterUserAsync(registerDTO);
             tokenAndId.Id = tokenDTO.UserID;
             tokenAndId.Token = tokenDTO.UserToken;
-            dbContext.Users.Add(new User() { Name = name, Id = tokenDTO.UserID });//, Keys = 
+            var me = new User() { Name = name, Id = tokenDTO.UserID};
+            me.Keys = KeyGenerationLogic.GenerateUserKeyList(me);
+            dbContext.Users.Add(me);//, Keys = 
             await dbContext.SaveChangesAsync();
             throw new NotImplementedException();
         }
         
-        private PublicKeyDTO GenerateKey()
-        {
-
-            var cngKey = CngKey.Create(CngAlgorithm.ECDiffieHellmanP256, null, new CngKeyCreationParameters { ExportPolicy = CngExportPolicies.AllowPlaintextExport });
-            var publicKey = cngKey.Export(CngKeyBlobFormat.EccFullPrivateBlob);
-            var privateKey = cngKey.Export(CngKeyBlobFormat.EccFullPrivateBlob);
-
-
-            var ecdh = new ECDiffieHellmanCng();
-            ecdh.ExportECPrivateKey();
-            var publickey = ecdh.PublicKey.ToByteArray();
-
-
-            var ecdh2 = new ECDiffieHellmanCng();
-            //ecdh.ImportECPrivateKey(privateKey);
-
-            var cngKey2 = CngKey.Create(CngAlgorithm.ECDiffieHellmanP256, null, new CngKeyCreationParameters { ExportPolicy = CngExportPolicies.AllowPlaintextExport });
-            var key = CngKey.Import(publickey, CngKeyBlobFormat.EccFullPublicBlob);
-            var we = CngKey.Import(privateKey, CngKeyBlobFormat.EccFullPrivateBlob);
-            var derivedKey = ecdh2.DeriveKeyMaterial(key);
-            
-
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Login user 

@@ -7,10 +7,10 @@ namespace MessengerAPI.Models.DbModels
 {
     public class PublicKey : DbModelBase
     {
-        public string KeyString { get; set; }
+        public byte[] KeyBytes { get; set; }
 
         public virtual User Owner { get; set; }
 
-        public KeyType KeyType { get; set; }
+        public PublicKeyType KeyType { get; set; }
     }
 }

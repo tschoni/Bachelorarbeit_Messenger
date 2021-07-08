@@ -64,7 +64,7 @@
                 </Menu>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBox Width="200" Margin="20, 10, 5, 10"  Foreground="White" BorderBrush="DarkCyan"/>
+                <TextBox Text="{Binding Path= SearchInput, Mode=TwoWay}" Width="200" Margin="20, 10, 5, 10"  Foreground="White" BorderBrush="DarkCyan"/>
                 <Button x:Name="SearchButton" Grid.Column="1" Width="29" Height="29" Background="Azure" BorderBrush="White" Margin="5" HorizontalAlignment="Right">
                     <Border Width="25" Height="25" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
                         <TextBlock Text="&#128270;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Foreground="DarkCyan" FontFamily="Impact"/>
