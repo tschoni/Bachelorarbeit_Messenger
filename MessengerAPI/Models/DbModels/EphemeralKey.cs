@@ -5,11 +5,8 @@ using System.Threading.Tasks;
 
 namespace MessengerAPI.Models.DbModels
 {
-    public enum PublicKeyType
+    public class EphemeralKey : PublicKey
     {
-        IdKey,
-        SignedKey,
-        OneTimeKey,
-        EphemeralKey
+        public virtual User Initiator{ get; set; }
     }
 }

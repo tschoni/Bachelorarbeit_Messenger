@@ -29,7 +29,7 @@ namespace MessengerWPF.Cryptography
             return new Key() { KeyType = KeyType.MasterKey, KeyString = masterKey, AssociatedUser = you };
         }
 
-        public static Key GenerateMasterKeyAsReactor(Key myPrivIdKey, Key myPrivSigKey, PublicKeyDTO yourEphemKey, PublicKeyDTO yourIdKey, User you)
+        public static Key GenerateMasterKeyAsReactor(Key myPrivIdKey, Key myPrivSigKey, EphemKeyDTO yourEphemKey, PublicKeyDTO yourIdKey, User you)
         {
 
             //var mySigCngKey = CngKey.Import(myPrivSigKey.KeyString, CngKeyBlobFormat.EccFullPrivateBlob);

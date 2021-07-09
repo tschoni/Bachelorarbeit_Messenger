@@ -14,7 +14,8 @@ namespace MessengerWPF.Models.DbModels
 
         public List<Message> Messages { get; set; }
 
-//        public List<Message> ReceivedMessages { get; set; }
+        //        public List<Message> ReceivedMessages { get; set; }
+        public List<Group> AdminOfGroups { get; set; }
 
         public List<User> Contacts { get; set; }
 

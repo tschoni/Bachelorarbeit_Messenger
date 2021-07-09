@@ -31,6 +31,9 @@ namespace MessengerAPI.Business
                 cfg.CreateMap<PublicKeyDTO, PublicKey>();
                 cfg.CreateMap<SignedKey, SignedKeyDTO>();
                 cfg.CreateMap<SignedKeyDTO, SignedKey>();
+                cfg.CreateMap<EphemeralKey, EphemKeyDTO>();
+                cfg.CreateMap<EphemKeyDTO, EphemeralKey>();
+
             });
 
             return config.CreateMapper();

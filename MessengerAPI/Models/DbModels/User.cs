@@ -26,5 +26,8 @@ namespace MessengerAPI.Models.DbModels
         public virtual List<Group> Groups { get; set; }
         
         public virtual List<Group> AdminOfGroups { get; set; }
+
+        public virtual List<EphemeralKey> EphemeralKeys { get; set; }
     }
 }
+//add-migration Initial-Migration

@@ -14,12 +14,15 @@ namespace MessengerWPF.Business
         HubConnection hubConnection;
         private readonly TokenAndIdProvider tokenAndId;
         private readonly GroupManagementLogic groupManagement;
+        private readonly MessagingLogic messagingLogic;
+        private readonly ContactInitiationLogic contactInitiation;
 
-        public SignalRClient(TokenAndIdProvider tokenAndId, GroupManagementLogic groupManagement)
+        public SignalRClient(TokenAndIdProvider tokenAndId, GroupManagementLogic groupManagement, MessagingLogic messagingLogic, ContactInitiationLogic contactInitiation)
         {
             this.tokenAndId = tokenAndId;
             this.groupManagement = groupManagement;
-
+            this.messagingLogic = messagingLogic;
+            this.contactInitiation = contactInitiation;
             hubConnection = new HubConnectionBuilder()
                  .WithUrl($"https://localhost:44384/signalr")
                 //.WithUrl($"https://asjhasdjhdjkashdjahsd/signalr")
@@ -38,6 +41,9 @@ namespace MessengerWPF.Business
                 {
                     switch (message.MessageType)
                     {
+                        case MessageType.EphemKeyPosted:
+                            contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
+                            break;
                         case MessageType.GroupCreated:
                         case MessageType.GroupAdminAdded:
                         case MessageType.GroupAdminRemoved:
@@ -55,6 +61,7 @@ namespace MessengerWPF.Business
                             }
                             break;
                         case MessageType.MessagePosted:
+                            messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
                             break;
                     }
                 }
@@ -81,7 +88,10 @@ namespace MessengerWPF.Business
             try
             {
                 hubConnection.StartAsync().GetAwaiter().GetResult();
-
+                contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
+                groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();               
+                messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
+                messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
             }
             catch (Exception ex )
             {
@@ -99,6 +109,10 @@ namespace MessengerWPF.Business
 
         private Task HubConnection_Reconnected(string arg)
         {
+            contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
+            groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
+            messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
+            messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
             return Task.CompletedTask;
         }
 

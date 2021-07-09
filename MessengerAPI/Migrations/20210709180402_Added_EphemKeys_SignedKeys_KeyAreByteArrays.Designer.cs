@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerAPI.Migrations
 {
     [DbContext(typeof(IMServerDbContext))]
-    [Migration("20210706075742_VirtualForeignKeys")]
-    partial class VirtualForeignKeys
+    [Migration("20210709180402_Added_EphemKeys_SignedKeys_KeyAreByteArrays")]
+    partial class Added_EphemKeys_SignedKeys_KeyAreByteArrays
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -73,11 +73,8 @@ namespace MessengerAPI.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("CipherText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MAC")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("CipherText")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<long?>("RecipientId")
                         .HasColumnType("bigint");
@@ -104,8 +101,12 @@ namespace MessengerAPI.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("KeyString")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("KeyBytes")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("KeyType")
                         .HasColumnType("int");
@@ -118,6 +119,8 @@ namespace MessengerAPI.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("PublicKeys");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("PublicKey");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.DbModels.User", b =>
@@ -147,6 +150,18 @@ namespace MessengerAPI.Migrations
                         .HasFilter("[UserToken] IS NOT NULL");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
+                {
+                    b.HasBaseType("MessengerAPI.Models.DbModels.PublicKey");
+
+                    b.Property<long?>("InitiatorId")
+                        .HasColumnType("bigint");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.HasDiscriminator().HasValue("EphemeralKey");
                 });
 
             modelBuilder.Entity("GroupUser", b =>
@@ -203,8 +218,19 @@ namespace MessengerAPI.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
+                {
+                    b.HasOne("MessengerAPI.Models.DbModels.User", "Initiator")
+                        .WithMany("EphemeralKeys")
+                        .HasForeignKey("InitiatorId");
+
+                    b.Navigation("Initiator");
+                });
+
             modelBuilder.Entity("MessengerAPI.Models.DbModels.User", b =>
                 {
+                    b.Navigation("EphemeralKeys");
+
                     b.Navigation("PublicKeys");
 
                     b.Navigation("ReceivedMessages");

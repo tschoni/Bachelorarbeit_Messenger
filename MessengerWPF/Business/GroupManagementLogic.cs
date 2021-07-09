@@ -10,9 +10,14 @@ namespace MessengerWPF.Business
 {
     public class GroupManagementLogic : BusinessLogicBase
     {
-        public GroupManagementLogic(IMApiClient apiClient, IMClientDbContext dbContext, TokenAndIdProvider tokenAndId) : base(apiClient, dbContext, tokenAndId)
+        private readonly ContactInitiationLogic contactInitiation;
+
+        public GroupManagementLogic(IMApiClient apiClient, IMClientDbContext dbContext, TokenAndIdProvider tokenAndId, ContactInitiationLogic contactInitiation) : base(apiClient, dbContext, tokenAndId)
         {
+            this.contactInitiation = contactInitiation;
         }
+
+
 
         public async Task AddGroupAsync( string name, List<long> memberIds)
         {
@@ -36,6 +41,10 @@ namespace MessengerWPF.Business
         {
             var groupDTO = await apiClient.GetGroupDetailsAsync(id, tokenAndId.Token);
             var group = await  dbContext.Groups.FindAsync(id);
+            if (group == null)
+            {
+                group = new Group() { Id = id, Name = groupDTO.Name };
+            }
             group = await UpdateGroupAsync(group, groupDTO);
             await dbContext.SaveChangesAsync();
         }
@@ -45,7 +54,12 @@ namespace MessengerWPF.Business
             var members = new List<User>();
             foreach (var memberId in groupDTO.MemberIds)
             {
-                members.Add(await dbContext.Users.FindAsync(memberId));
+                var contact = await dbContext.Users.FindAsync(memberId);
+                if (contact == null)
+                {
+                    await contactInitiation.InitiateKeyExchangeByIdAsync(memberId);
+                }
+                members.Add(contact);
             }
             var admins = new List<User>();
             foreach (var adminId in groupDTO.AdminIds)
@@ -62,6 +76,10 @@ namespace MessengerWPF.Business
         public async Task UpdateAllGroupAsync()
         {
             var groupIds = await apiClient.GetGroupListByUserAsync(new TokenDTO() {UserID = tokenAndId.Id, UserToken = tokenAndId.Token });
+            if (groupIds == null)
+            {
+                return;
+            }
             foreach (var groupId in groupIds)
             {
                 await UpdateGroupByIdAsync(groupId);

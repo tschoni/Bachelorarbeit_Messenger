@@ -12,8 +12,8 @@ namespace MessengerAPI.Models.DTO
 
         public long RecipientId { get; set; }
 
-        public string CipherText { get; set; }
+        public byte[] CipherText { get; set; }
 
-        public string MAC { get; set; }
+        //public string MAC { get; set; }
     }
 }

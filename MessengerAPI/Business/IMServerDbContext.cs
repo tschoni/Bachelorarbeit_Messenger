@@ -18,6 +18,10 @@ namespace MessengerAPI.Business
 
         public DbSet<PublicKey> PublicKeys { get; set; }
 
+        public DbSet<EphemeralKey> EphemeralKeys { get; set; }
+
+        //public DbSet<SignedKey> SignedKeys { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var builder = new SqlConnectionStringBuilder
@@ -43,6 +47,7 @@ namespace MessengerAPI.Business
             modelBuilder.Entity<Message>().HasOne(x => x.Recipient).WithMany(x => x.ReceivedMessages);
 
             modelBuilder.Entity<User>().HasMany(x => x.PublicKeys).WithOne(x => x.Owner);
+            modelBuilder.Entity<EphemeralKey>().HasOne(x => x.Initiator).WithMany(x => x.EphemeralKeys);
 
             modelBuilder.Entity<Group>().HasMany(x => x.Members).WithMany(x => x.Groups);
             modelBuilder.Entity<Group>().HasMany(x => x.Admins).WithMany(x=> x.AdminOfGroups);
@@ -56,6 +61,9 @@ namespace MessengerAPI.Business
 
             base.OnModelCreating(modelBuilder);
         }
+
+
+
     }
 }
 //        modelBuilder.Entity<Student>()

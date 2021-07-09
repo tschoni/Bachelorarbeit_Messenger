@@ -48,6 +48,7 @@ namespace MessengerWPF.Business
 
             modelBuilder.Entity<Group>().HasMany(x => x.Messages).WithOne(x => x.Group);
             modelBuilder.Entity<Group>().HasMany(x => x.Members).WithMany(x => x.Groups);
+            modelBuilder.Entity<Group>().HasMany(x => x.Admins).WithMany(x => x.AdminOfGroups);
 
             //            var cascadeFKs = modelBuilder.Model.GetEntityTypes()
             //                .SelectMany(t => t.GetForeignKeys())

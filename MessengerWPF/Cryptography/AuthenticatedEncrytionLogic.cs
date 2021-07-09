@@ -9,63 +9,35 @@ using System.Security.Cryptography;
 
 namespace MessengerWPF.Cryptography
 {
-    class AesEncrypt
-    {
+    public static class AuthenticatedEncrytionLogic
+    {     
+        
         public static readonly int BlockBitSize = 128;
         public static readonly int KeyBitSize = 256;
+        
         /// <summary>
-        /// Simple Encryption (AES) then Authentication (HMAC) for a UTF8 Message.
+        /// Encrypt messageContent with AES256-CBC-PKCS7 and authenticate with HMAC-SHA256
         /// </summary>
-        /// <param name="secretMessage">The secret message.</param>
-        /// <param name="cryptKey">The crypt key.</param>
-        /// <param name="authKey">The auth key.</param>
-        /// <returns>
-        /// Encrypted Message
-        /// </returns>
-        /// <exception cref="System.ArgumentException">Secret Message Required!;secretMessage</exception>
-        /// <remarks>
-        /// Adds overhead of (BlockSize(16) + Message-Padded-To-Blocksize +  HMac-Tag(32)) * 1.33 Base64
-        /// </remarks>
-        public static string Encrypt(string secretMessage, byte[] cryptKey, byte[] authKey)
-        {
-            if (string.IsNullOrEmpty(secretMessage))
+        /// <param name="plainText"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static byte[] Encrypt(string plainText, byte[] key)
+        {          
+            if (string.IsNullOrEmpty(plainText))
             {
-                throw new ArgumentException("Secret Message Required!", nameof(secretMessage));
+                throw new ArgumentException("Secret Message Required!", nameof(plainText));
             }
 
-            var plainText = Encoding.UTF8.GetBytes(secretMessage);
-            var cipherText = Encrypt(plainText, cryptKey, authKey);
+            var plainBytes = Encoding.UTF8.GetBytes(plainText);
 
-            return Convert.ToBase64String(cipherText);
-        }
-
-        /// <summary>
-        /// Simple Encryption(AES) then Authentication (HMAC) for a UTF8 Message.
-        /// </summary>
-        /// <param name="secretMessage">The secret message.</param>
-        /// <param name="cryptKey">The crypt key.</param>
-        /// <param name="authKey">The auth key.</param>
-        /// <returns>
-        /// Encrypted Message
-        /// </returns>
-        /// <remarks>
-        /// Adds overhead of (BlockSize(16) + Message-Padded-To-Blocksize +  HMac-Tag(32)) * 1.33 Base64
-        /// </remarks>
-        public static byte[] Encrypt(byte[] secretMessage, byte[] cryptKey, byte[] authKey)
-        {
-            if (cryptKey == null || cryptKey.Length != KeyBitSize / 8)
+            if (key == null || key.Length != KeyBitSize / 8)
             {
-                throw new ArgumentException($"Key needs to be {KeyBitSize} bit!", nameof(cryptKey));
+                throw new ArgumentException($"Key needs to be {KeyBitSize} bit!", nameof(key));
             }
 
-            if (authKey == null || authKey.Length != KeyBitSize / 8)
+            if (plainBytes == null || plainBytes.Length < 1)
             {
-                throw new ArgumentException($"Key needs to be {KeyBitSize} bit!", nameof(authKey));
-            }
-
-            if (secretMessage == null || secretMessage.Length < 1)
-            {
-                throw new ArgumentException("Secret Message Required!", nameof(secretMessage));
+                throw new ArgumentException("Secret Message Required!", nameof(plainBytes));
             }
 
             byte[] cipherText;
@@ -77,7 +49,7 @@ namespace MessengerWPF.Cryptography
                 aes.GenerateIV();
                 iv = aes.IV;
 
-                using (var encrypter = aes.CreateEncryptor(cryptKey, iv))
+                using (var encrypter = aes.CreateEncryptor(key, iv))
                 {
                     using (var cipherStream = new MemoryStream())
                     {
@@ -85,7 +57,7 @@ namespace MessengerWPF.Cryptography
                         {
                             using (var binaryWriter = new BinaryWriter(cryptoStream))
                             {
-                                binaryWriter.Write(secretMessage);
+                                binaryWriter.Write(plainBytes);
                             }
                         }
 
@@ -95,7 +67,7 @@ namespace MessengerWPF.Cryptography
             }
 
             // Assemble encrypted message and add authentication
-            using (var hmac = new HMACSHA256(authKey))
+            using (var hmac = new HMACSHA256(key))
             {
                 using (var encryptedStream = new MemoryStream())
                 {
@@ -120,46 +92,18 @@ namespace MessengerWPF.Cryptography
             }
         }
 
-        /// <summary>
-        /// Simple Authentication (HMAC) then Decryption (AES) for a secrets UTF8 Message.
-        /// </summary>
-        /// <param name="encryptedMessage">The encrypted message.</param>
-        /// <param name="cryptKey">The crypt key.</param>
-        /// <param name="authKey">The auth key.</param>
-        /// <returns>
-        /// Decrypted Message
-        /// </returns>
-        /// <exception cref="System.ArgumentException">Encrypted Message Required!;encryptedMessage</exception>
-        public static string Decrypt(string encryptedMessage, byte[] cryptKey, byte[] authKey)
-        {
-            if (string.IsNullOrWhiteSpace(encryptedMessage))
-            {
-                throw new ArgumentException("Encrypted Message Required!", nameof(encryptedMessage));
-            }
-
-            var cipherText = Convert.FromBase64String(encryptedMessage);
-            var plainText = Decrypt(cipherText, cryptKey, authKey);
-
-            return plainText == null ? null : Encoding.UTF8.GetString(plainText);
-        }
 
         /// <summary>
-        /// Simple Authentication (HMAC) then Decryption (AES) for a secrets UTF8 Message.
+        /// Decrypts and authenticates the encrypted message.
         /// </summary>
-        /// <param name="encryptedMessage">The encrypted message.</param>
-        /// <param name="cryptKey">The crypt key.</param>
-        /// <param name="authKey">The auth key.</param>
-        /// <returns>Decrypted Message</returns>
-        public static byte[] Decrypt(byte[] encryptedMessage, byte[] cryptKey, byte[] authKey)
+        /// <param name="encryptedMessage"></param>
+        /// <param name="key"></param>
+        /// <returns>plaintext of serialized message content object</returns>
+        public static string Decrypt(byte[] encryptedMessage, byte[] key)
         {
-            if (cryptKey == null || cryptKey.Length != KeyBitSize / 8)
+            if (key == null || key.Length != KeyBitSize / 8)
             {
-                throw new ArgumentException($"CryptKey needs to be {KeyBitSize} bit!", nameof(cryptKey));
-            }
-
-            if (authKey == null || authKey.Length != KeyBitSize / 8)
-            {
-                throw new ArgumentException($"AuthKey needs to be {KeyBitSize} bit!", nameof(authKey));
+                throw new ArgumentException($"CryptKey needs to be {KeyBitSize} bit!", nameof(key));
             }
 
             if (encryptedMessage == null || encryptedMessage.Length == 0)
@@ -167,12 +111,12 @@ namespace MessengerWPF.Cryptography
                 throw new ArgumentException("Encrypted Message Required!", nameof(encryptedMessage));
             }
 
-            using (var hmac = new HMACSHA256(authKey))
+            using (var hmac = new HMACSHA256(key))
             {
                 var sentTag = new byte[hmac.HashSize / 8];
 
                 var calcTag = hmac.ComputeHash(encryptedMessage, 0, encryptedMessage.Length - sentTag.Length);
-                var ivLength = (BlockBitSize / 8);
+                var ivLength = BlockBitSize / 8;
 
                 if (encryptedMessage.Length < sentTag.Length + ivLength)
                 {
@@ -200,7 +144,7 @@ namespace MessengerWPF.Cryptography
                     var iv = new byte[ivLength];
                     Array.Copy(encryptedMessage, 0, iv, 0, iv.Length);
 
-                    using (var decrypter = aes.CreateDecryptor(cryptKey, iv))
+                    using (var decrypter = aes.CreateDecryptor(key, iv))
                     {
                         using (var plainTextStream = new MemoryStream())
                         {
@@ -215,12 +159,13 @@ namespace MessengerWPF.Cryptography
                                     );
                                 }
                             }
-
-                            return plainTextStream.ToArray();
+                            var plainText = plainTextStream.ToArray();
+                            return plainText == null ? null : Encoding.UTF8.GetString(plainText);
                         }
                     }
                 }
             }
+           
         }
 
         private static Aes CreateAes()

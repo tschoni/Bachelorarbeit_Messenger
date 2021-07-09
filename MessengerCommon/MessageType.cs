@@ -8,6 +8,7 @@ namespace MessengerCommon
 {
     public enum MessageType
     {
+        EphemKeyPosted,
         GroupCreated,
         GroupMemberAdded,
         GroupMemberRemoved,

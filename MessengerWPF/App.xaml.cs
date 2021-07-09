@@ -20,14 +20,14 @@ namespace MessengerWPF
     /// </summary>
     public partial class App : Application
     {
-        //static SignalRClient signalRClient = new SignalRClient();
+        static IUnityContainer container = new UnityContainer();
         static BackgroundWorker worker = new BackgroundWorker();
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            IUnityContainer container = new UnityContainer();
+            
 
             // TODO Add exception Handler
             var httpClient = new HttpClient(new HttpClientHandler()
@@ -36,6 +36,7 @@ namespace MessengerWPF
             });
             container.RegisterInstance(new IMApiClient("https://localhost:44384/", httpClient));
             container.RegisterSingleton<TokenAndIdProvider>();
+            container.RegisterSingleton<SignalRClient>();
 
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerAsync();
@@ -50,7 +51,8 @@ namespace MessengerWPF
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            //signalRClient.StartAsync().GetAwaiter().GetResult();
+            var signalRClient = container.Resolve<SignalRClient>();
+            signalRClient.StartAsync().GetAwaiter().GetResult();
         }
     }
 }
