@@ -8,7 +8,7 @@ namespace MessengerWPF.Models.DbModels
 {
     public class Key : DbModelBase
     {
-        public byte[] KeyString { get; set; }
+        public byte[] KeyBytes { get; set; }
 
         public KeyType KeyType { get; set; }
 

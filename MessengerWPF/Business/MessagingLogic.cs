@@ -2,6 +2,7 @@
 using MessengerWPF.Cryptography;
 using MessengerWPF.Models;
 using MessengerWPF.Models.DbModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,28 +13,30 @@ namespace MessengerWPF.Business
 {
     public class MessagingLogic : BusinessLogicBase
     {
-        private readonly SignalRClient signalRClient;
-
-        public MessagingLogic(IMClientDbContext dbContext, IMApiClient apiClient, TokenAndIdProvider tokenAndId, SignalRClient signalRClient) : base(apiClient, dbContext, tokenAndId)
+        public MessagingLogic(IMClientDbContext dbContext, IMApiClient apiClient, TokenAndIdProvider tokenAndId) : base(apiClient, dbContext, tokenAndId)
         {
-            this.signalRClient = signalRClient;
+
         }
 
         public async Task RetreiveMessagesAsync()
         {
 
-            var messages = await apiClient.GetUsersReceivedMessagesAsync(new TokenDTO() { UserID = tokenAndId.Id, UserToken = tokenAndId.Token });
+            var messages = await apiClient.GetUsersReceivedMessagesAsync(new TokenDTO() { Id = tokenAndId.Id, UserToken = tokenAndId.Token });
             if (messages == null)
             {
                 return;
             }
             foreach(var message in messages.ReceiveMessageList)
             {
-                var sender = await dbContext.Users.FindAsync(message.SenderId);
+                var sender = await dbContext.Users.Include(x => x.Keys).FirstAsync(x => x.Id == message.Sender.Id);
 
-                var plaintext = AuthenticatedEncrytionLogic.Decrypt(message.CipherText, sender.Keys.Find(x => x.KeyType == KeyType.MasterKey).KeyString);
+                var plaintext = AuthenticatedEncrytionLogic.Decrypt(message.CipherText, sender.Keys.Find(x => x.KeyType == KeyType.MasterKey).KeyBytes);
                 var messageContent = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageContent>(plaintext);
-                var group = await dbContext.Groups.FindAsync(messageContent.GroupId);
+                var group = await dbContext.Groups.Include(x => x.Members).FirstAsync(x => x.Id == messageContent.GroupId);
+                if (!group.Members.Exists(x => x.Id == message.Sender.Id))
+                {
+                    continue;
+                }
                 var grTextMessage = new GroupTextMessage() { Sender = sender, Text = messageContent.Plaintext, Group= group, MessageState = MessageState.Resolved, TimeStamp=message.TimeStamp };
                 dbContext.GroupTextMessages.Add(grTextMessage);
                 await dbContext.SaveChangesAsync();
@@ -43,7 +46,7 @@ namespace MessengerWPF.Business
         public async Task SendPendingMessagesAsync()
         {
 
-            var messages = (List<GroupTextMessage>)dbContext.GroupTextMessages.Where(x => x.MessageState == MessageState.Pending && x.Sender.Id == tokenAndId.Id);
+            var messages = (List<GroupTextMessage>)dbContext.GroupTextMessages.Include(x => x.Group).ThenInclude(x => x.Members).ThenInclude(x => x.Keys).Where(x => x.MessageState == MessageState.Pending && x.Sender.Id == tokenAndId.Id);
             if (messages == null)
             {
                 return;
@@ -51,19 +54,20 @@ namespace MessengerWPF.Business
             var encryptedMessages = new List<MessageSendDTO>();
             foreach (var message in messages)
             {
-                encryptedMessages.AddRange(GenerateMessageDTOs(message));
+                encryptedMessages.AddRange(await GenerateMessageDTOs(message));
                 message.TimeStamp = DateTime.Now;
                 message.MessageState = MessageState.Resolved;
             }
             await apiClient.PostMultipleMessagesAsync(tokenAndId.Token, new MessageSendListDTO() { MessageList = encryptedMessages });
         }
 
-        public async Task SendMessageAsync(string plaintext, Group group)
+        public async Task SendMessageAsync(string plaintext, Group selectedGroup, SignalRClient signalRClient)
         {
+            var group = await dbContext.Groups.Include(x => x.Members).ThenInclude(x => x.Keys).FirstAsync(x => x.Id == selectedGroup.Id);
             var groupTextMessage = new GroupTextMessage() { Group = group, Text = plaintext, Sender = group.Members.Find(x => x.Id == tokenAndId.Id) };
             if (signalRClient.IsConnected)
             {
-                var messageDTOs =  GenerateMessageDTOs(groupTextMessage);
+                var messageDTOs = await  GenerateMessageDTOs(groupTextMessage);
                 await apiClient.PostMultipleMessagesAsync(tokenAndId.Token, new MessageSendListDTO() { MessageList = messageDTOs });
                 groupTextMessage.TimeStamp =  DateTime.Now;
                 groupTextMessage.MessageState = MessageState.Resolved;
@@ -76,17 +80,18 @@ namespace MessengerWPF.Business
             await dbContext.SaveChangesAsync();
         }
 
-        public List<MessageSendDTO> GenerateMessageDTOs(GroupTextMessage message)
+        public async Task<List<MessageSendDTO>> GenerateMessageDTOs(GroupTextMessage message)
         {
             var messageContent = new MessageContent() { GroupId = message.Group.Id, Plaintext = message.Text };
             var plaintext = Newtonsoft.Json.JsonConvert.SerializeObject(messageContent);
             var encryptedMessages = new List<MessageSendDTO>();
+            var me = await dbContext.Users.Include(x => x.Keys).FirstAsync(x => x.Id == tokenAndId.Id);
             foreach (var member in message.Group.Members)
             {
                 if (member.Id != tokenAndId.Id)
                 {
-                    var ciphertext = AuthenticatedEncrytionLogic.Encrypt(plaintext, member.Keys.Find(x => x.KeyType == KeyType.MasterKey).KeyString);
-                    var messageDTO = new MessageSendDTO() { SenderId = tokenAndId.Id, RecipientId = member.Id, CipherText = ciphertext };
+                    var ciphertext = AuthenticatedEncrytionLogic.Encrypt(plaintext, member.Keys.Find(x => x.KeyType == KeyType.MasterKey).KeyBytes);
+                    var messageDTO = new MessageSendDTO() { Sender = new UserDTO() { Id = me.Id, Name =me.Name} , Recipient = new UserDTO() { Id = member.Id, Name = member.Name }, CipherText = ciphertext };
                     encryptedMessages.Add(messageDTO);
                 }
             }

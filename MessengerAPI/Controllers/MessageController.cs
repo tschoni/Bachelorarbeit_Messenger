@@ -70,7 +70,7 @@ namespace MessengerAPI.Controllers
         public async Task<ActionResult<MessageReceiveListDTO>> GetUsersReceivedMessages(TokenDTO tokenDTO)
         {
 
-            User user = await _context.Users.FindAsync(tokenDTO.UserID);
+            User user = await _context.Users.Include(x => x.ReceivedMessages).FirstAsync(x => x.Id == tokenDTO.Id);
             if (user.UserToken != tokenDTO.UserToken)
             {
                 return BadRequest("Not Authorized");
@@ -92,6 +92,8 @@ namespace MessengerAPI.Controllers
         {
 
             var message = mapper.Map<Message>(messageDTO);
+            message.Recipient = await _context.Users.FindAsync(messageDTO.Recipient.Id);
+            message.Sender = await _context.Users.FindAsync(messageDTO.Sender.Id);
             if (message.Sender.UserToken != token)
             {
                 return BadRequest("Not Authorized");
@@ -104,12 +106,15 @@ namespace MessengerAPI.Controllers
         }
 
         [HttpPost(nameof(PostMultipleMessages))]
+        [ProducesResponseType(204)]
         public async Task<ActionResult> PostMultipleMessages(MessageSendListDTO messageListDTO, string token)
         {
             var recipients = new List<User>();
             foreach(var messageDTO in messageListDTO.MessageList)
             {
                 var message = mapper.Map<Message>(messageDTO);
+                message.Recipient = await _context.Users.FindAsync(messageDTO.Recipient.Id);
+                message.Sender = await _context.Users.FindAsync(messageDTO.Sender.Id);
                 if (message.Sender.UserToken != token)
                 {
                     return BadRequest("Not Authorized");
@@ -127,6 +132,7 @@ namespace MessengerAPI.Controllers
         }
         // DELETE: api/Message/5
         [HttpDelete(nameof(DeleteMessage)+"/{id}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteMessage(long id)
         {
             

@@ -39,7 +39,7 @@ namespace MessengerAPI.Controllers
         {
             //await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = id });
 
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include(x => x.Members).FirstAsync(x => x.Id == groupId);
 
             if (group == null)
             {
@@ -53,12 +53,18 @@ namespace MessengerAPI.Controllers
         }
 
         [HttpGet(nameof(GetGroupListByUser))]
+        //[ProducesResponseType(200)]
+        //[ProducesResponseType(204)]
         public async Task<ActionResult<List<long>>> GetGroupListByUser(TokenDTO tokenDTO)
         {
-            var user = await _context.Users.FindAsync(tokenDTO.UserID);
+            var user = await _context.Users.Include(x => x.Groups).FirstAsync(x => x.Id == tokenDTO.Id);
             if (user.UserToken != tokenDTO.UserToken) { return BadRequest("Not authorized");}
             var groupIds = new List<long>();
             user.Groups.ForEach(x => groupIds.Add(x.Id));
+            //if (groupIds.Count < 1)
+            //{
+            //    return NoContent();
+            //}
             return groupIds;//mapper.Map<GroupListDTO>(user.Groups);
         }
 
@@ -67,20 +73,38 @@ namespace MessengerAPI.Controllers
         [HttpPost("CreateGroup")]
         public async Task<ActionResult<long>> PostGroup(GroupDetailsDTO groupDetails, string token)
         {
-            var group = mapper.Map<Group>(groupDetails);
+            var members = new List<User>() { };
+            foreach( var member in groupDetails.Members)
+            {
+                var user = await _context.Users.FindAsync(member.Id);
+                members.Add(user);    
+            }
+            var admins = new List<User>() { };
+            foreach (var admin in groupDetails.Admins)
+            {
+                var user = await _context.Users.FindAsync(admin.Id);
+                admins.Add(user);
+            }
+            var group = new Group() { Members= members, Admins=admins, Name=groupDetails.Name };//mapper.Map<Group>(groupDetails);
             if (!IsAdmin(group, token).GetAwaiter().GetResult())
             {
                 return BadRequest("Not authorized.");
             }
-/*            if (group.Members.Count <= 1)
+            /*            if (group.Members.Count <= 1)
+                        {
+                            return BadRequest("Group must have at least 1 member.");
+                        }
+                        if (group.Admins.Count <= 1)
+                        {
+                            return BadRequest("Group must have at least 1 admin.");
+                        }*/
+            try
             {
-                return BadRequest("Group must have at least 1 member.");
+                _context.Groups.Add(group);
             }
-            if (group.Admins.Count <= 1)
-            {
-                return BadRequest("Group must have at least 1 admin.");
-            }*/
-            _context.Groups.Add(group);
+            catch (Exception ex ){
+                return BadRequest(ex.Message);
+            }
             await _context.SaveChangesAsync();
 
             foreach( var member in group.Members)
@@ -94,7 +118,7 @@ namespace MessengerAPI.Controllers
         [HttpPost(nameof(AddGroupMember) + "/{groupId}/{userId}")]
         public async Task<ActionResult<GroupDetailsDTO>> AddGroupMember(long groupId, long userId, string token)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include( x => x.Members).FirstAsync(x => x.Id == groupId);
             var user = await _context.Users.FindAsync(userId);
             if (group == null || user == null)
             {
@@ -116,7 +140,7 @@ namespace MessengerAPI.Controllers
         [HttpPost(nameof(RemoveGroupMember) + "/{groupId}/{userId}")]
         public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupMember(long groupId, long userId, string token)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include(x => x.Members).FirstAsync(x => x.Id == groupId);
             var user = group.Members.Find(x => x.Id == userId);
             if (group == null || user == null)
             {
@@ -138,7 +162,7 @@ namespace MessengerAPI.Controllers
         [HttpPost(nameof(AddGroupAdmin) + "/{groupId}/{userId}")]
         public async Task<ActionResult<GroupDetailsDTO>> AddGroupAdmin(long groupId, long userId, string token)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include(x => x.Members).FirstAsync(x => x.Id == groupId);
             var user = group.Members.Find(x => x.Id == userId);
             if (group == null || user == null)
             {
@@ -167,7 +191,7 @@ namespace MessengerAPI.Controllers
         [HttpPost(nameof(RemoveGroupAdmin) + "/{groupId}/{userId}")]
         public async Task<ActionResult<GroupDetailsDTO>> RemoveGroupAdmin(long groupId, long userId, string token)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include(x => x.Members).FirstAsync(x => x.Id == groupId);
             var user = group.Admins.Find(x => x.Id == userId);
             if (group == null || user == null)
             {
@@ -197,6 +221,7 @@ namespace MessengerAPI.Controllers
         GetGroupDetails 1 */
 
         [HttpDelete(nameof(DeleteGroup) + "/{id}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteGroup(long id, string token)
         {
             var group = await _context.Groups.FindAsync(id);
@@ -220,7 +245,7 @@ namespace MessengerAPI.Controllers
         private async Task<bool> IsAdmin(Group group, string token)
         {
             var user = await _context.Users.FirstAsync(x => x.UserToken == token);
-            if (group.Admins.Contains(user))
+            if (group.Admins.Exists(x => x.Id == user.Id))
             {
                 return true;
             }
@@ -230,7 +255,7 @@ namespace MessengerAPI.Controllers
         private async Task<bool> IsMember(Group group, string token)
         {
             var user = await _context.Users.FirstAsync(x => x.UserToken == token);
-            if (group.Members.Contains(user))
+            if (group.Members.Exists(x => x.Id == user.Id))
             {
                 return true;
             }

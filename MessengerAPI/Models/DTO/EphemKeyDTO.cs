@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 
 namespace MessengerAPI.Models.DTO
 {
-    public class EphemKeyDTO : PublicKeyDTO
+    public class EphemKeyDTO 
     {
-        public long OwnerId { get; set; }
+        public long Id { get; set; }
 
-        public long InitiatorId { get; set; }
+        public byte[] KeyBytes { get; set; }
+
+        public UserDTO Owner { get; set; }
+
+        public UserDTO Initiator { get; set; }
     }
 }

@@ -10,20 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MessengerWPF.ViewModels;
 
 namespace MessengerWPF.Views
 {
     /// <summary>
-    /// Interaktionslogik für MessengerView.xaml
+    /// Interaktionslogik für CreateGroupView.xaml
     /// </summary>
-    public partial class MessengerView : UserControl//Window
+    public partial class CreateGroupView : UserControl
     {
-        public MessengerView()
+        public CreateGroupView()
         {
             InitializeComponent();
-            //this.DataContext = new MessengerViewModel();
         }
     }
 }

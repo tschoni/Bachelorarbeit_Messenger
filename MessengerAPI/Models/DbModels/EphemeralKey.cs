@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 
 namespace MessengerAPI.Models.DbModels
 {
-    public class EphemeralKey : PublicKey
+    public class EphemeralKey : DbModelBase
     {
-        public virtual User Initiator{ get; set; }
+        public byte[] KeyBytes { get; set; }
+
+        public virtual User Owner { get; set; }
+
+        public virtual User Initiator { get; set; }
     }
 }

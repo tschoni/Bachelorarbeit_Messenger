@@ -11,19 +11,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using MessengerWPF.ViewModels;
 
 namespace MessengerWPF.Views
 {
     /// <summary>
-    /// Interaktionslogik für MessengerView.xaml
+    /// Interaktionslogik für LoginView.xaml
     /// </summary>
-    public partial class MessengerView : UserControl//Window
+    public partial class LoginView : UserControl//Window
     {
-        public MessengerView()
+        public LoginView()
         {
             InitializeComponent();
-            //this.DataContext = new MessengerViewModel();
         }
     }
 }

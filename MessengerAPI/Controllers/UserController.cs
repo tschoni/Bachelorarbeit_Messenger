@@ -31,14 +31,14 @@ namespace MessengerAPI.Controllers
         [HttpGet(nameof(GetUserByName) + "/{name}")]
         public async Task<ActionResult<UserDetailsDTO>> GetUserByName(string name)
         {
-            var user = await _context.Users.FirstAsync(x => x.Name == name);
+            var user = await _context.Users.Include(x => x.PublicKeys).FirstAsync(x => x.Name == name);
 
             if (user == null)
             {
                 return NotFound();
             }
-
-            return mapper.Map<UserDetailsDTO>(user);
+            var userDTO = mapper.Map<UserDetailsDTO>(user);
+            return userDTO;
         }
 
         [HttpGet(nameof(GetUserById) + "/{id}")]
@@ -61,9 +61,10 @@ namespace MessengerAPI.Controllers
         public async Task<ActionResult<TokenDTO>> RegisterUser(UserRegisterDTO registerDTO)
         {
             var user = mapper.Map<User>(registerDTO);
+            //user.PublicKeys = mapper.Map<List<PublicKey>>(registerDTO.PublicKeys);
             var number = RandomNumber.GenerateRandomNumber(256);
             user.UserToken = Convert.ToBase64String(number);
-            _context.Users.Add(user);
+            user =  _context.Users.Add(user).Entity;
             await _context.SaveChangesAsync();
 
             return mapper.Map<TokenDTO>(user);
@@ -77,16 +78,16 @@ namespace MessengerAPI.Controllers
             {
                 return NotFound("User not found.");
             }
-            if (user.Password == loginDTO.Password)
+            if (user.Password != loginDTO.Password)
             {
                 return BadRequest("Wrong Password");
             }
-
             return mapper.Map<TokenDTO>(user);
         }
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteUser(long id, string userToken)
         {
             var user = await _context.Users.FindAsync(id);

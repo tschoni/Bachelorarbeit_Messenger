@@ -7,7 +7,7 @@ namespace MessengerAPI.Models.DTO
 {
     public class TokenDTO
     {
-        public long UserID { get; set; }
+        public long Id { get; set; }
 
         public string UserToken { get; set; }
     }

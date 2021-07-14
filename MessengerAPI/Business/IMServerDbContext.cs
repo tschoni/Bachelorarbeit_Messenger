@@ -43,21 +43,21 @@ namespace MessengerAPI.Business
             modelBuilder.Entity<User>().HasIndex(u => u.Name).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u => u.UserToken).IsUnique();
 
-            modelBuilder.Entity<Message>().HasOne(x => x.Sender).WithMany(x => x.SentMessages);
-            modelBuilder.Entity<Message>().HasOne(x => x.Recipient).WithMany(x => x.ReceivedMessages);
+            modelBuilder.Entity<Message>().HasOne(x => x.Sender).WithMany(x => x.SentMessages); /*.OnDelete(DeleteBehavior.Cascade)*/
+            modelBuilder.Entity<Message>().HasOne(x => x.Recipient).WithMany(x => x.ReceivedMessages); /*.OnDelete(DeleteBehavior.Cascade)*/
 
-            modelBuilder.Entity<User>().HasMany(x => x.PublicKeys).WithOne(x => x.Owner);
-            modelBuilder.Entity<EphemeralKey>().HasOne(x => x.Initiator).WithMany(x => x.EphemeralKeys);
+            modelBuilder.Entity<User>().HasMany(x => x.PublicKeys).WithOne(x => x.Owner).OnDelete(DeleteBehavior.Cascade); ;
+            modelBuilder.Entity<EphemeralKey>().HasOne(x => x.Initiator).WithMany(x => x.EphemeralKeys).OnDelete(DeleteBehavior.Cascade); 
 
             modelBuilder.Entity<Group>().HasMany(x => x.Members).WithMany(x => x.Groups);
             modelBuilder.Entity<Group>().HasMany(x => x.Admins).WithMany(x=> x.AdminOfGroups);
 
-//            var cascadeFKs = modelBuilder.Model.GetEntityTypes()
-//                .SelectMany(t => t.GetForeignKeys())
-//                .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
+            //var cascadeFKs = modelBuilder.Model.GetEntityTypes()
+            //    .SelectMany(t => t.GetForeignKeys())
+            //    .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
 
-//            foreach (var fk in cascadeFKs)
-//                fk.DeleteBehavior = DeleteBehavior.Restrict;
+            //foreach (var fk in cascadeFKs)
+            //    fk.DeleteBehavior = DeleteBehavior.Restrict;
 
             base.OnModelCreating(modelBuilder);
         }

@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 
 namespace MessengerAPI.Models.DTO
 {
-    public class SignedKeyDTO : PublicKeyDTO
+    public class UserDTO
     {
-        public byte[] Signature { get; set; }
+        public long Id { get; set; }
+
+        public string Name { get; set; }
     }
 }

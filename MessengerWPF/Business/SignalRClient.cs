@@ -17,7 +17,7 @@ namespace MessengerWPF.Business
         private readonly MessagingLogic messagingLogic;
         private readonly ContactInitiationLogic contactInitiation;
 
-        public SignalRClient(TokenAndIdProvider tokenAndId, GroupManagementLogic groupManagement, MessagingLogic messagingLogic, ContactInitiationLogic contactInitiation)
+        public SignalRClient(TokenAndIdProvider tokenAndId, ContactInitiationLogic contactInitiation, GroupManagementLogic groupManagement, MessagingLogic messagingLogic  ) //
         {
             this.tokenAndId = tokenAndId;
             this.groupManagement = groupManagement;
@@ -89,7 +89,8 @@ namespace MessengerWPF.Business
             {
                 hubConnection.StartAsync().GetAwaiter().GetResult();
                 contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
-                groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();               
+                groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
+                
                 messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
                 messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
             }

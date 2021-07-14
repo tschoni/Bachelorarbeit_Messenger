@@ -19,29 +19,29 @@ namespace MessengerWPF.Cryptography
 
         public static Key GenerateMasterKeyAsInitiator(Key myPrivIdKey, byte[] myEphemKey, PublicKeyDTO yourSignedKey, PublicKeyDTO yourIdKey, User you)
         {
-            var ecdh1 = GenerateDiffieHellmanShared(myPrivIdKey.KeyString, yourSignedKey.KeyString);
-            var ecdh2 = GenerateDiffieHellmanShared(myEphemKey, yourIdKey.KeyString);
-            var ecdh3 = GenerateDiffieHellmanShared(myEphemKey, yourSignedKey.KeyString);
+            var ecdh1 = GenerateDiffieHellmanShared(myPrivIdKey.KeyBytes, yourSignedKey.KeyBytes);
+            var ecdh2 = GenerateDiffieHellmanShared(myEphemKey, yourIdKey.KeyBytes);
+            var ecdh3 = GenerateDiffieHellmanShared(myEphemKey, yourSignedKey.KeyBytes);
 
             var combined = ecdh1.Concat(ecdh2).Concat(ecdh3);
             var masterKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, combined.ToArray(), masterKeyLength);
 
-            return new Key() { KeyType = KeyType.MasterKey, KeyString = masterKey, AssociatedUser = you };
+            return new Key() { KeyType = KeyType.MasterKey, KeyBytes = masterKey, AssociatedUser = you };
         }
 
         public static Key GenerateMasterKeyAsReactor(Key myPrivIdKey, Key myPrivSigKey, EphemKeyDTO yourEphemKey, PublicKeyDTO yourIdKey, User you)
         {
 
-            //var mySigCngKey = CngKey.Import(myPrivSigKey.KeyString, CngKeyBlobFormat.EccFullPrivateBlob);
-            var ecdh1 = GenerateDiffieHellmanShared(myPrivSigKey.KeyString, yourIdKey.KeyString);
-            var ecdh2 = GenerateDiffieHellmanShared(myPrivIdKey.KeyString, yourEphemKey.KeyString);
-            var ecdh3 = GenerateDiffieHellmanShared(myPrivSigKey.KeyString, yourEphemKey.KeyString);
+            //var mySigCngKey = CngKey.Import(myPrivSigKey.KeyBytes, CngKeyBlobFormat.EccFullPrivateBlob);
+            var ecdh1 = GenerateDiffieHellmanShared(myPrivSigKey.KeyBytes, yourIdKey.KeyBytes);
+            var ecdh2 = GenerateDiffieHellmanShared(myPrivIdKey.KeyBytes, yourEphemKey.KeyBytes);
+            var ecdh3 = GenerateDiffieHellmanShared(myPrivSigKey.KeyBytes, yourEphemKey.KeyBytes);
 
             var combined = ecdh1.Concat(ecdh2).Concat(ecdh3);
             var masterKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, combined.ToArray() , masterKeyLength);
 
-            return new Key() { KeyType = KeyType.MasterKey, KeyString = masterKey, AssociatedUser = you };
-            //ecdh1.ImportECPrivateKey(myPrivSigKey.KeyString)
+            return new Key() { KeyType = KeyType.MasterKey, KeyBytes = masterKey, AssociatedUser = you };
+            //ecdh1.ImportECPrivateKey(myPrivSigKey.KeyBytes)
 
         }
         
@@ -90,7 +90,7 @@ namespace MessengerWPF.Cryptography
         {
 
             ECDsaCng eCDsa = new ECDsaCng(cngKey);
-            return new SignedKey { KeyType = KeyType.SignedKeyPublic, AssociatedUser = user, KeyString = sigPublicKey, Signature = eCDsa.SignData(sigPublicKey)}; 
+            return new SignedKey { KeyType = KeyType.SignedKeyPublic, AssociatedUser = user, KeyBytes = sigPublicKey, Signature = eCDsa.SignData(sigPublicKey)}; 
         }
 
         public static bool VerifySignedKey(byte[] signature, byte[] publicSigKey, byte[] publicIdKey)
@@ -106,19 +106,19 @@ namespace MessengerWPF.Cryptography
             switch (type)
             {
                 case KeyType.IdentityKeyPrivate:
-                    key = new Key { KeyType = KeyType.IdentityKeyPrivate, AssociatedUser = user, KeyString = keyPair.PrivateKey };
+                    key = new Key { KeyType = KeyType.IdentityKeyPrivate, AssociatedUser = user, KeyBytes = keyPair.PrivateKey };
                     break;
                 case KeyType.IdentityKeyPublic:
-                    key = new Key { KeyType = KeyType.IdentityKeyPublic, AssociatedUser = user, KeyString = keyPair.PublicKey };
+                    key = new Key { KeyType = KeyType.IdentityKeyPublic, AssociatedUser = user, KeyBytes = keyPair.PublicKey };
                     break;
                 case KeyType.SignedKeyPrivate:
-                    key = new Key { KeyType = KeyType.SignedKeyPrivate, AssociatedUser = user, KeyString = keyPair.PrivateKey };
+                    key = new Key { KeyType = KeyType.SignedKeyPrivate, AssociatedUser = user, KeyBytes = keyPair.PrivateKey };
                     break;
                 case KeyType.OneTimeKeyPrivate:
-                    key = new Key { KeyType = KeyType.OneTimeKeyPrivate, AssociatedUser = user, KeyString = keyPair.PrivateKey };
+                    key = new Key { KeyType = KeyType.OneTimeKeyPrivate, AssociatedUser = user, KeyBytes = keyPair.PrivateKey };
                     break;
                 case KeyType.OneTimeKeyPublic:
-                    key = new Key { KeyType = KeyType.OneTimeKeyPublic, AssociatedUser = user, KeyString = keyPair.PublicKey };
+                    key = new Key { KeyType = KeyType.OneTimeKeyPublic, AssociatedUser = user, KeyBytes = keyPair.PublicKey };
                     break;
             }
             return key;

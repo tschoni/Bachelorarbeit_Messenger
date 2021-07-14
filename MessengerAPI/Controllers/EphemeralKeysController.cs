@@ -36,9 +36,11 @@ namespace MessengerAPI.Controllers
 
         // GET: api/EphemeralKeys/5
         [HttpGet(nameof(GetEphemeralKeys))]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(200)]
         public async Task<ActionResult<EphemKeyListDTO>> GetEphemeralKeys(long userId, string token)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.Include(x => x.EphemeralKeys).ThenInclude(x => x.Owner).FirstAsync(x => x.Id == userId);
             if (user.UserToken != token)
             {
                 return BadRequest("Not authorized.");
@@ -52,9 +54,16 @@ namespace MessengerAPI.Controllers
             var keyList = new List<EphemKeyDTO>();
             foreach (var ephemeralKey in ephemeralKeys)
             {
-                var ephemKey = mapper.Map<EphemKeyDTO>(ephemeralKey);
-                keyList.Add(ephemKey);
+                if(ephemeralKey.Owner.Id == user.Id)
+                {
+                    var ephemKey = mapper.Map<EphemKeyDTO>(ephemeralKey);
+                    keyList.Add(ephemKey);
+                }
             }
+            //if (keyList.Count <= 1)
+            //{
+            //    return NoContent();
+            //}
             return new EphemKeyListDTO() { KeyDTOs = keyList };
         }
 
@@ -62,25 +71,29 @@ namespace MessengerAPI.Controllers
         // POST: api/EphemeralKeys
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost(nameof(PostEphemeralKey))]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> PostEphemeralKey(EphemKeyDTO ephemeralKey, string token)
         {
             
             var ephemKey = mapper.Map<EphemeralKey>(ephemeralKey);
+            ephemKey.Initiator = await _context.Users.FindAsync(ephemeralKey.Initiator);
+            ephemKey.Owner = await _context.Users.FindAsync(ephemeralKey.Owner);
             if (ephemKey.Initiator.UserToken != token)
             {
                 return BadRequest("Not authorized.");
             }
             _context.EphemeralKeys.Add(ephemKey);
             await _context.SaveChangesAsync();
-            await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = ephemeralKey.OwnerId, MessageType = MessageType.EphemKeyPosted });
+            await hubContext.Clients.All.NotifyMessage(new NotifyMessage { UserId = ephemeralKey.Owner.Id, MessageType = MessageType.EphemKeyPosted });
             return NoContent();
         }
 
         // DELETE: api/EphemeralKeys/5
         [HttpDelete(nameof(DeleteEphemeralKey))]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteEphemeralKey(long id, string token)
         {
-            var ephemeralKey = await _context.EphemeralKeys.FindAsync(id);
+            var ephemeralKey = await _context.EphemeralKeys.Include(x => x.Owner).FirstAsync(x => x.Id == id);
             if (ephemeralKey == null)
             {
                 return NotFound();

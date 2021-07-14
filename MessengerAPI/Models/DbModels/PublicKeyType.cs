@@ -10,6 +10,5 @@ namespace MessengerAPI.Models.DbModels
         IdKey,
         SignedKey,
         OneTimeKey,
-        EphemeralKey
     }
 }

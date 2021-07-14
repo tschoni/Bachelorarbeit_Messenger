@@ -12,5 +12,6 @@ namespace MessengerAPI.Models.DbModels
         public virtual User Owner { get; set; }
 
         public PublicKeyType KeyType { get; set; }
+        public byte[] Signature { get; set; }
     }
 }

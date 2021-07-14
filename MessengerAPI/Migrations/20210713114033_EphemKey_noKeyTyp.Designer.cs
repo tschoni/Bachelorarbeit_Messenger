@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessengerAPI.Migrations
 {
     [DbContext(typeof(IMServerDbContext))]
-    [Migration("20210709180402_Added_EphemKeys_SignedKeys_KeyAreByteArrays")]
-    partial class Added_EphemKeys_SignedKeys_KeyAreByteArrays
+    [Migration("20210713114033_EphemKey_noKeyTyp")]
+    partial class EphemKey_noKeyTyp
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -49,6 +49,31 @@ namespace MessengerAPI.Migrations
                     b.HasIndex("AdminsId");
 
                     b.ToTable("GroupUser1");
+                });
+
+            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long?>("InitiatorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("KeyBytes")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<long?>("OwnerId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("EphemeralKeys");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.DbModels.Group", b =>
@@ -101,10 +126,6 @@ namespace MessengerAPI.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("KeyBytes")
                         .HasColumnType("varbinary(max)");
 
@@ -114,13 +135,14 @@ namespace MessengerAPI.Migrations
                     b.Property<long?>("OwnerId")
                         .HasColumnType("bigint");
 
+                    b.Property<byte[]>("Signature")
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("PublicKeys");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("PublicKey");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.DbModels.User", b =>
@@ -150,18 +172,6 @@ namespace MessengerAPI.Migrations
                         .HasFilter("[UserToken] IS NOT NULL");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
-                {
-                    b.HasBaseType("MessengerAPI.Models.DbModels.PublicKey");
-
-                    b.Property<long?>("InitiatorId")
-                        .HasColumnType("bigint");
-
-                    b.HasIndex("InitiatorId");
-
-                    b.HasDiscriminator().HasValue("EphemeralKey");
                 });
 
             modelBuilder.Entity("GroupUser", b =>
@@ -194,6 +204,21 @@ namespace MessengerAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
+                {
+                    b.HasOne("MessengerAPI.Models.DbModels.User", "Initiator")
+                        .WithMany("EphemeralKeys")
+                        .HasForeignKey("InitiatorId");
+
+                    b.HasOne("MessengerAPI.Models.DbModels.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+
+                    b.Navigation("Initiator");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("MessengerAPI.Models.DbModels.Message", b =>
                 {
                     b.HasOne("MessengerAPI.Models.DbModels.User", "Recipient")
@@ -216,15 +241,6 @@ namespace MessengerAPI.Migrations
                         .HasForeignKey("OwnerId");
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("MessengerAPI.Models.DbModels.EphemeralKey", b =>
-                {
-                    b.HasOne("MessengerAPI.Models.DbModels.User", "Initiator")
-                        .WithMany("EphemeralKeys")
-                        .HasForeignKey("InitiatorId");
-
-                    b.Navigation("Initiator");
                 });
 
             modelBuilder.Entity("MessengerAPI.Models.DbModels.User", b =>

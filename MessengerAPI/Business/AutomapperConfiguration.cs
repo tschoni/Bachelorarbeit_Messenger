@@ -15,24 +15,37 @@ namespace MessengerAPI.Business
             var config = new MapperConfiguration(cfg =>
             {
                 /// Mapping for Group Controller
-                cfg.CreateMap<Group, GroupDetailsDTO>();
-                cfg.CreateMap<GroupDetailsDTO, Group>();
+                cfg.CreateMap<Group, GroupDetailsDTO>()
+                    .ForMember(dest => dest.Admins, opt => opt.MapFrom(src => src.Admins))
+                    .ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.Members));
+                cfg.CreateMap<GroupDetailsDTO, Group>()
+                    .ForMember(dest => dest.Admins, opt => opt.MapFrom(src => src.Admins))
+                    .ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.Members));
                 cfg.CreateMap<GroupUpdateNameDTO, Group>();
 
                 /// Mapping for Message Controller
-                cfg.CreateMap<MessageSendDTO, Message>();
-                cfg.CreateMap<Message, MessageReceiveDTO>();
+                cfg.CreateMap<MessageSendDTO, Message>()
+                    .ForMember(dest => dest.Recipient, opt => opt.MapFrom(src => src.Recipient))
+                    .ForMember(dest => dest.Sender, opt => opt.MapFrom(src=> src.Sender));
+                cfg.CreateMap<Message, MessageReceiveDTO>()
+                    .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender)); //.Id??
                 /// Mapping for User Controller
-                cfg.CreateMap<User, UserRegisterDTO>();
-                cfg.CreateMap<UserDetailsDTO, User>();
+                cfg.CreateMap<UserDTO, User>().ReverseMap();
+                
+                cfg.CreateMap<UserRegisterDTO, User>()
+                    .ForMember(dest => dest.PublicKeys, opt => opt.MapFrom(src => src.PublicKeys));
+                cfg.CreateMap<User, UserDetailsDTO>()
+                    .ForMember(dest => dest.PublicKeys, opt => opt.MapFrom(src => src.PublicKeys));
                 cfg.CreateMap<UserLoginDTO, User>();
                 cfg.CreateMap<User, TokenDTO>();
                 cfg.CreateMap<PublicKey, PublicKeyDTO>();
                 cfg.CreateMap<PublicKeyDTO, PublicKey>();
-                cfg.CreateMap<SignedKey, SignedKeyDTO>();
-                cfg.CreateMap<SignedKeyDTO, SignedKey>();
-                cfg.CreateMap<EphemeralKey, EphemKeyDTO>();
+                cfg.CreateMap<EphemeralKey, EphemKeyDTO>()
+                    .ForMember(dest => dest.Initiator, opt => opt.MapFrom(src => src.Initiator))
+                    .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.Owner));
                 cfg.CreateMap<EphemKeyDTO, EphemeralKey>();
+                //    .ForMember(dest => dest.Initiator, opt => opt.MapFrom(src => src.InitiatorId))
+                //    .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.OwnerId));
 
             });
 

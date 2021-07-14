@@ -1,5 +1,6 @@
 ﻿using MessengerApiClient;
 using MessengerWPF.Models.DbModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,20 +20,27 @@ namespace MessengerWPF.Business
 
 
 
-        public async Task AddGroupAsync( string name, List<long> memberIds)
+        public async Task AddGroupAsync( string name, List<User> members)
         {
-            memberIds.Add(tokenAndId.Id);
-            var groupDTO = new GroupDetailsDTO() { Name = name, AdminIds = new List<long>() { tokenAndId.Id }, MemberIds = memberIds };
-            var groupId = await apiClient.CreateGroupAsync(tokenAndId.Token, groupDTO);
-            var group = new Group() { Name = name , Id = groupId};
-            var me = await dbContext.Users.FindAsync(tokenAndId.Id);
-            group.Admins.Add(me);
-            foreach(var memberId in memberIds)
+            var memberDTOs = new List<UserDTO>();
+            var me = dbContext.Users.Find(tokenAndId.Id);
+            memberDTOs.Add(new UserDTO() { Id = me.Id, Name= me.Name });
+            foreach(var member in members)
             {
-                var member = await dbContext.Users.FindAsync(memberId);
-                group.Members.Add(member);
+                memberDTOs.Add(new UserDTO() { Id = member.Id, Name = member.Name });
             }
-            dbContext.Add(group);
+            
+            var groupDTO = new GroupDetailsDTO() { Name = name, Admins = new List<UserDTO>() { new UserDTO() { Id = me.Id, Name = me.Name } }, Members = memberDTOs };
+            var groupId = await apiClient.CreateGroupAsync(tokenAndId.Token, groupDTO);
+            //var group = new Group() { Name = name , Id = groupId, Members=members, Admins =new List<User>(), Messages = new List<GroupMessage>()};FirstAsync
+            var group = new Group() { Name = name, Id = groupId, Members = new List<User>(), Admins = new List<User>(), Messages = new List<GroupMessage>() };
+            foreach(var member in members)
+            {
+                group.Members.Add(await dbContext.Users.FindAsync(member.Id));
+            }
+            group.Admins.Add(me);
+            group.Members.Add(me);
+            dbContext.Groups.Add(group);
             await dbContext.SaveChangesAsync();
 
         }
@@ -40,10 +48,10 @@ namespace MessengerWPF.Business
         public async Task UpdateGroupByIdAsync(long id)
         {
             var groupDTO = await apiClient.GetGroupDetailsAsync(id, tokenAndId.Token);
-            var group = await  dbContext.Groups.FindAsync(id);
+            var group = await dbContext.Groups.Include(x => x.Members).Include(x => x.Admins).FirstOrDefaultAsync(x => x.Id == id);
             if (group == null)
             {
-                group = new Group() { Id = id, Name = groupDTO.Name };
+                group = new Group() { Id = id, Name = groupDTO.Name, Members = new List<User>(), Admins = new List<User>(), Messages = new List<GroupMessage>() };
             }
             group = await UpdateGroupAsync(group, groupDTO);
             await dbContext.SaveChangesAsync();
@@ -52,19 +60,19 @@ namespace MessengerWPF.Business
         private async Task<Group> UpdateGroupAsync( Group group, GroupDetailsDTO groupDTO)
         {
             var members = new List<User>();
-            foreach (var memberId in groupDTO.MemberIds)
+            foreach (var memberDTO in groupDTO.Members)
             {
-                var contact = await dbContext.Users.FindAsync(memberId);
+                var contact = await dbContext.Users.FindAsync(memberDTO.Id);
                 if (contact == null)
                 {
-                    await contactInitiation.InitiateKeyExchangeByIdAsync(memberId);
+                    await contactInitiation.InitiateKeyExchangeByIdAsync(memberDTO.Id);
                 }
                 members.Add(contact);
             }
             var admins = new List<User>();
-            foreach (var adminId in groupDTO.AdminIds)
+            foreach (var adminDTO in groupDTO.Admins)
             {
-                admins.Add(await dbContext.Users.FindAsync(adminId));
+                admins.Add(await dbContext.Users.FindAsync(adminDTO.Id));
             }
             group.Name = groupDTO.Name;
             group.Members = members;
@@ -75,7 +83,7 @@ namespace MessengerWPF.Business
 
         public async Task UpdateAllGroupAsync()
         {
-            var groupIds = await apiClient.GetGroupListByUserAsync(new TokenDTO() {UserID = tokenAndId.Id, UserToken = tokenAndId.Token });
+            var groupIds = await apiClient.GetGroupListByUserAsync(new TokenDTO() {Id = tokenAndId.Id, UserToken = tokenAndId.Token });
             if (groupIds == null)
             {
                 return;
@@ -112,7 +120,8 @@ namespace MessengerWPF.Business
             var group = await dbContext.Groups.FindAsync(id);
             dbContext.Groups.Remove(group);
             await apiClient.DeleteGroupAsync(id, tokenAndId.Token);
-
+            await dbContext.SaveChangesAsync();
+            //TODO austreten aus Gruppe + nur löschen wenn admin oder ausgetreten
         }
     }
 }

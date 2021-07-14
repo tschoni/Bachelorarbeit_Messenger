@@ -25,18 +25,29 @@ namespace MessengerWPF.Business
         /// <param name="name"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task RegisterUserAsync(string name, string password)
+        public async Task<bool> RegisterUserAsync(string name, string password)
         {
-            //TODO: Generate public and private Keys
-            var registerDTO = new UserRegisterDTO() { Name = name, Password = password };// public Keys
-            var tokenDTO = await apiClient.RegisterUserAsync(registerDTO);
-            tokenAndId.Id = tokenDTO.UserID;
-            tokenAndId.Token = tokenDTO.UserToken;
-            var me = new User() { Name = name, Id = tokenDTO.UserID};
+            var me = new User() { Name = name, AdminOfGroups = new List<Group>(), Contacts = new List<User>(), Groups = new List<Group>(), Keys = new List<Key>(), Messages = new List<Message>() };
             me.Keys = KeyGenerationLogic.GenerateUserKeyList(me);
-            dbContext.Users.Add(me);//, Keys = 
-            await dbContext.SaveChangesAsync();
-            throw new NotImplementedException();
+            var idKey = me.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPublic);
+            var sigKey = (SignedKey)me.Keys.Find(x => x.KeyType == KeyType.SignedKeyPublic);
+            var publicKeys = new List<PublicKeyDTO> { new PublicKeyDTO { KeyBytes = idKey.KeyBytes, KeyType = PublicKeyType.IdKey }, new PublicKeyDTO { KeyBytes =sigKey.KeyBytes, KeyType = PublicKeyType.SignedKey, Signature=sigKey.Signature } };
+            //TODO: Generate public and private Keys
+            var registerDTO = new UserRegisterDTO() { Name = name, Password = password, PublicKeys = publicKeys};// public Keys Signature
+            try
+            {
+                var tokenDTO = await apiClient.RegisterUserAsync(registerDTO);
+                tokenAndId.Id = tokenDTO.Id;
+                tokenAndId.Token = tokenDTO.UserToken;
+                me.Id = tokenAndId.Id;
+                dbContext.Users.Add(me);//, Keys = 
+                await dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (ApiException)
+            {
+                return false;
+            }   
         }
         
 
@@ -46,12 +57,28 @@ namespace MessengerWPF.Business
         /// <param name="name"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task LoginUserAsync(string name, string password)
+        public async Task<bool> LoginUserAsync(string name, string password)
         {
             var loginDTO = new UserLoginDTO() { Name = name, Password = password };
-            var tokenDTO = await apiClient.LoginUserAsync(loginDTO);
-            tokenAndId.Id = tokenDTO.UserID;
-            tokenAndId.Token = tokenDTO.UserToken;
+            try
+            {
+                var tokenDTO = await apiClient.LoginUserAsync(loginDTO);
+                tokenAndId.Id = tokenDTO.Id;
+                tokenAndId.Token = tokenDTO.UserToken;
+                /*var me = await  dbContext.Users.FindAsync(tokenAndId.Id);
+                if (me == null)
+                {
+                    me = new User() {Id= tokenAndId.Id,  Name = name, AdminOfGroups = new List<Group>(), Contacts = new List<User>(), Groups = new List<Group>(), Keys = new List<Key>(), Messages = new List<Message>() };
+                    await dbContext.SaveChangesAsync();
+                }*/
+
+                return true;
+            }
+            catch(ApiException)
+            {
+                return false;
+            }
+            
         }
     }
 }

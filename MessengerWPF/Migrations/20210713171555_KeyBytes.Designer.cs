@@ -3,14 +3,16 @@ using System;
 using MessengerWPF.Business;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MessengerWPF.Migrations
 {
     [DbContext(typeof(IMClientDbContext))]
-    partial class IMClientDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210713171555_KeyBytes")]
+    partial class KeyBytes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
