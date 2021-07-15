@@ -40,12 +40,12 @@ namespace MessengerAPI.Controllers
         //[ProducesResponseType(200)]
         public async Task<ActionResult<EphemKeyListDTO>> GetEphemeralKeys(long userId, string token)
         {
-            var user = await _context.Users.Include(x => x.EphemeralKeys).ThenInclude(x => x.Owner).FirstAsync(x => x.Id == userId);
+            var user = await _context.Users.FindAsync(userId);//.Include(x => x.EphemeralKeys).ThenInclude(x => x.Owner).FirstAsync(x => x.Id == userId);
             if (user.UserToken != token)
             {
                 return BadRequest("Not authorized.");
             }
-            var ephemeralKeys = user.EphemeralKeys;
+            var ephemeralKeys = _context.EphemeralKeys.Include(x => x.Initiator).Where(x => x.Owner.Id == user.Id);//user.EphemeralKeys;
 
             if (ephemeralKeys == null)
             {
@@ -54,11 +54,8 @@ namespace MessengerAPI.Controllers
             var keyList = new List<EphemKeyDTO>();
             foreach (var ephemeralKey in ephemeralKeys)
             {
-                if(ephemeralKey.Owner.Id == user.Id)
-                {
-                    var ephemKey = mapper.Map<EphemKeyDTO>(ephemeralKey);
-                    keyList.Add(ephemKey);
-                }
+                var ephemKey = mapper.Map<EphemKeyDTO>(ephemeralKey);
+                keyList.Add(ephemKey);
             }
             //if (keyList.Count <= 1)
             //{
@@ -76,8 +73,8 @@ namespace MessengerAPI.Controllers
         {
             
             var ephemKey = mapper.Map<EphemeralKey>(ephemeralKey);
-            ephemKey.Initiator = await _context.Users.FindAsync(ephemeralKey.Initiator);
-            ephemKey.Owner = await _context.Users.FindAsync(ephemeralKey.Owner);
+            ephemKey.Initiator = await _context.Users.FindAsync(ephemeralKey.Initiator.Id);
+            ephemKey.Owner = await _context.Users.FindAsync(ephemeralKey.Owner.Id);
             if (ephemKey.Initiator.UserToken != token)
             {
                 return BadRequest("Not authorized.");

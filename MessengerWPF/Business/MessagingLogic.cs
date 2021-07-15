@@ -26,7 +26,7 @@ namespace MessengerWPF.Business
             {
                 return;
             }
-            foreach(var message in messages.ReceiveMessageList)
+            foreach(var message in messages.ToList())
             {
                 var sender = await dbContext.Users.Include(x => x.Keys).FirstAsync(x => x.Id == message.Sender.Id);
 
@@ -37,16 +37,17 @@ namespace MessengerWPF.Business
                 {
                     continue;
                 }
-                var grTextMessage = new GroupTextMessage() { Sender = sender, Text = messageContent.Plaintext, Group= group, MessageState = MessageState.Resolved, TimeStamp=message.TimeStamp };
+                var grTextMessage = new GroupTextMessage() { Sender = sender, Text = messageContent.Plaintext, Group = group, MessageState = MessageState.Resolved, TimeStamp = message.TimeStamp };
                 dbContext.GroupTextMessages.Add(grTextMessage);
                 await dbContext.SaveChangesAsync();
+                await apiClient.DeleteMessageAsync(message.Id);
             }
-        }// Frage: jedensmal safen oder am ende?
+        }// Frage: jedensmal safen oder am ende?(List<GroupTextMessage>)
 
         public async Task SendPendingMessagesAsync()
         {
 
-            var messages = (List<GroupTextMessage>)dbContext.GroupTextMessages.Include(x => x.Group).ThenInclude(x => x.Members).ThenInclude(x => x.Keys).Where(x => x.MessageState == MessageState.Pending && x.Sender.Id == tokenAndId.Id);
+            var messages = dbContext.GroupTextMessages.Include(x => x.Group).ThenInclude(x => x.Members).ThenInclude(x => x.Keys).Where(x => x.MessageState == MessageState.Pending && x.Sender.Id == tokenAndId.Id);
             if (messages == null)
             {
                 return;
@@ -58,7 +59,7 @@ namespace MessengerWPF.Business
                 message.TimeStamp = DateTime.Now;
                 message.MessageState = MessageState.Resolved;
             }
-            await apiClient.PostMultipleMessagesAsync(tokenAndId.Token, new MessageSendListDTO() { MessageList = encryptedMessages });
+            await apiClient.PostMultipleMessagesAsync(tokenAndId.Token,  encryptedMessages );
         }
 
         public async Task SendMessageAsync(string plaintext, Group selectedGroup, SignalRClient signalRClient)
@@ -68,7 +69,7 @@ namespace MessengerWPF.Business
             if (signalRClient.IsConnected)
             {
                 var messageDTOs = await  GenerateMessageDTOs(groupTextMessage);
-                await apiClient.PostMultipleMessagesAsync(tokenAndId.Token, new MessageSendListDTO() { MessageList = messageDTOs });
+                await apiClient.PostMultipleMessagesAsync(tokenAndId.Token, messageDTOs );
                 groupTextMessage.TimeStamp =  DateTime.Now;
                 groupTextMessage.MessageState = MessageState.Resolved;
             }

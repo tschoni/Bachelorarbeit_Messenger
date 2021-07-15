@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MessengerWPF.ViewModels
 {
@@ -66,12 +67,20 @@ namespace MessengerWPF.ViewModels
             {
                 if(await registrationAndLogin.LoginUserAsync(UserName, Password))
                 {
+                    UserName = null;
+                    Password = null;
+                    navigationStore.CurrentViewModel = messengerViewModel;
                     worker.RunWorkerAsync();
                     await messengerViewModel.GetGroups();
-                    navigationStore.CurrentViewModel = messengerViewModel;
                     //var messageDialog = new MessengerView();
                     //messageDialog.Show();
                     //TODO Fenster öffnen und schließen
+                }
+                else
+                {
+                    MessageBox.Show("Wrong username or password.");
+                    UserName = null;
+                    Password = null;
                 }
 
             }

@@ -37,9 +37,9 @@
             <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" >
                 <TextBlock Text="Login or Register" FontWeight="DemiBold" Foreground="Teal" FontSize="14" Margin="0,0,0,10"/>
                 <TextBlock Text="Username" Foreground="Teal" Margin="10,10,5,0"/>
-                <TextBox Text="{Binding Path=UserName}" Margin="10,2,10,10"/>
+                <TextBox Text="{Binding Path=UserName, UpdateSourceTrigger=PropertyChanged}" Margin="10,2,10,10"/>
                 <TextBlock Text="Password" Foreground="Teal" Margin="10,10,5,0"/>
-                <TextBox Text="{Binding Path=Password}" Margin="10,2,10,10"/>
+                <TextBox Text="{Binding Path=Password, UpdateSourceTrigger=PropertyChanged}" Margin="10,2,10,10"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10,50,10,10">
                     <Button Content=" Login " Command="{Binding Path=LoginCommand}" Margin="5"  BorderBrush="Teal" Background="Azure" />
                     <Button Content=" Register " Command="{Binding Path=RegisterCommand}" Margin="5" BorderBrush="Teal" Background="Azure"/>

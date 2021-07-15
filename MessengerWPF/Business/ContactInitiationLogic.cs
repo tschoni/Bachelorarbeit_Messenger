@@ -55,7 +55,7 @@ namespace MessengerWPF.Business
             var myEphemKeys = KeyGenerationLogic.GenerateKeyPair(KeyGenerationLogic.CreateCngKey());
             await apiClient.PostEphemeralKeyAsync( tokenAndId.Token, new EphemKeyDTO() { Initiator = new UserDTO() { Id = myself.Id, Name = myself.Name}, Owner = new UserDTO() { Id = newContact.Id, Name = newContact.Name }, KeyBytes = myEphemKeys.PublicKey });
             var masterKey = KeyGenerationLogic.GenerateMasterKeyAsInitiator(myKeys.Find(x => x.KeyType == KeyType.IdentityKeyPrivate), myEphemKeys.PrivateKey, userKeys.Find(x => x.KeyType == PublicKeyType.SignedKey), userKeys.Find(x => x.KeyType == PublicKeyType.IdKey), newContact);
-            
+            dbContext.Users.Add(newContact);
             dbContext.Keys.Add(masterKey);
             await dbContext.SaveChangesAsync();
             
@@ -71,9 +71,11 @@ namespace MessengerWPF.Business
             var myself = await dbContext.Users.Include(x => x.Contacts).Include(x => x.Keys).FirstAsync(x => x.Id == tokenAndId.Id);
             foreach( var ephemKey in ephemKeyList.KeyDTOs)
             {
+
                 var contact = await dbContext.Users.FindAsync(ephemKey.Initiator.Id);
                 if (contact != null)
                 {
+                    await apiClient.DeleteEphemeralKeyAsync(ephemKey.Id, tokenAndId.Token);
                     continue;
                 }
                 var userDetails = await apiClient.GetUserByIdAsync(ephemKey.Initiator.Id);
@@ -85,9 +87,11 @@ namespace MessengerWPF.Business
                     myself.Contacts = new List<User>();
                 }
                 myself.Contacts.Add(newContact);
-                var masterKey = KeyGenerationLogic.GenerateMasterKeyAsReactor(myself.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPrivate), myself.Keys.Find(x => x.KeyType == KeyType.SignedKeyPrivate), ephemKey, userKeys.Find(x => x.KeyType == PublicKeyType.IdKey), contact);
+                var masterKey = KeyGenerationLogic.GenerateMasterKeyAsReactor(myself.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPrivate), myself.Keys.Find(x => x.KeyType == KeyType.SignedKeyPrivate), ephemKey, userKeys.Find(x => x.KeyType == PublicKeyType.IdKey), newContact);
+                dbContext.Users.Add(newContact);
                 dbContext.Keys.Add(masterKey);
                 await dbContext.SaveChangesAsync();
+                await apiClient.DeleteEphemeralKeyAsync(ephemKey.Id, tokenAndId.Token);
             }
 
         }

@@ -119,12 +119,12 @@ namespace MessengerApiClient
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<MessageReceiveListDTO> GetUsersReceivedMessagesAsync(TokenDTO body);
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<MessageReceiveDTO>> GetUsersReceivedMessagesAsync(TokenDTO body);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<MessageReceiveListDTO> GetUsersReceivedMessagesAsync(TokenDTO body, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<MessageReceiveDTO>> GetUsersReceivedMessagesAsync(TokenDTO body, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -137,12 +137,12 @@ namespace MessengerApiClient
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, MessageSendListDTO body);
+        System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, System.Collections.Generic.IEnumerable<MessageSendDTO> body);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, MessageSendListDTO body, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, System.Collections.Generic.IEnumerable<MessageSendDTO> body, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -203,13 +203,11 @@ namespace MessengerApiClient
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.3.0 (NJsonSchema v10.4.4.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class IMApiClient : IIMApiClient
     {
-        private string _baseUrl = "";
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
 
-        public IMApiClient(string baseUrl, System.Net.Http.HttpClient httpClient)
+        public IMApiClient(System.Net.Http.HttpClient httpClient)
         {
-            BaseUrl = baseUrl;
             _httpClient = httpClient;
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
         }
@@ -219,12 +217,6 @@ namespace MessengerApiClient
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
-        }
-
-        public string BaseUrl
-        {
-            get { return _baseUrl; }
-            set { _baseUrl = value; }
         }
 
         protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _settings.Value; } }
@@ -248,7 +240,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<EphemKeyListDTO> GetEphemeralKeysAsync(long? userId, string token, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/EphemeralKeys/GetEphemeralKeys?");
+            urlBuilder_.Append("api/EphemeralKeys/GetEphemeralKeys?");
             if (userId != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("userId") + "=").Append(System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -331,7 +323,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task PostEphemeralKeyAsync(string token, EphemKeyDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/EphemeralKeys/PostEphemeralKey?");
+            urlBuilder_.Append("api/EphemeralKeys/PostEphemeralKey?");
             if (token != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -407,7 +399,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task DeleteEphemeralKeyAsync(long? id, string token, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/EphemeralKeys/DeleteEphemeralKey?");
+            urlBuilder_.Append("api/EphemeralKeys/DeleteEphemeralKey?");
             if (id != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("id") + "=").Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -487,7 +479,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("groupId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/GetGroupDetails/{groupId}?");
+            urlBuilder_.Append("api/Group/GetGroupDetails/{groupId}?");
             urlBuilder_.Replace("{groupId}", System.Uri.EscapeDataString(ConvertToString(groupId, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
             {
@@ -567,7 +559,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<long>> GetGroupListByUserAsync(TokenDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/GetGroupListByUser");
+            urlBuilder_.Append("api/Group/GetGroupListByUser");
 
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -644,7 +636,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<long> CreateGroupAsync(string token, GroupDetailsDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/CreateGroup?");
+            urlBuilder_.Append("api/Group/CreateGroup?");
             if (token != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -732,7 +724,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("userId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/AddGroupMember/{groupId}/{userId}?");
+            urlBuilder_.Append("api/Group/AddGroupMember/{groupId}/{userId}?");
             urlBuilder_.Replace("{groupId}", System.Uri.EscapeDataString(ConvertToString(groupId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
@@ -820,7 +812,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("userId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/RemoveGroupMember/{groupId}/{userId}?");
+            urlBuilder_.Append("api/Group/RemoveGroupMember/{groupId}/{userId}?");
             urlBuilder_.Replace("{groupId}", System.Uri.EscapeDataString(ConvertToString(groupId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
@@ -908,7 +900,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("userId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/AddGroupAdmin/{groupId}/{userId}?");
+            urlBuilder_.Append("api/Group/AddGroupAdmin/{groupId}/{userId}?");
             urlBuilder_.Replace("{groupId}", System.Uri.EscapeDataString(ConvertToString(groupId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
@@ -996,7 +988,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("userId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/RemoveGroupAdmin/{groupId}/{userId}?");
+            urlBuilder_.Append("api/Group/RemoveGroupAdmin/{groupId}/{userId}?");
             urlBuilder_.Replace("{groupId}", System.Uri.EscapeDataString(ConvertToString(groupId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
@@ -1081,7 +1073,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("id");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Group/DeleteGroup/{id}?");
+            urlBuilder_.Append("api/Group/DeleteGroup/{id}?");
             urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
             if (token != null)
             {
@@ -1144,7 +1136,7 @@ namespace MessengerApiClient
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<MessageReceiveListDTO> GetUsersReceivedMessagesAsync(TokenDTO body)
+        public System.Threading.Tasks.Task<System.Collections.Generic.ICollection<MessageReceiveDTO>> GetUsersReceivedMessagesAsync(TokenDTO body)
         {
             return GetUsersReceivedMessagesAsync(body, System.Threading.CancellationToken.None);
         }
@@ -1152,10 +1144,10 @@ namespace MessengerApiClient
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<MessageReceiveListDTO> GetUsersReceivedMessagesAsync(TokenDTO body, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<MessageReceiveDTO>> GetUsersReceivedMessagesAsync(TokenDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Message/GetUsersReceivedMessages");
+            urlBuilder_.Append("api/Message/GetUsersReceivedMessages");
 
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1192,7 +1184,7 @@ namespace MessengerApiClient
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<MessageReceiveListDTO>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<MessageReceiveDTO>>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -1232,7 +1224,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<System.DateTime> PostMessageAsync(string token, MessageSendDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Message/PostMessage?");
+            urlBuilder_.Append("api/Message/PostMessage?");
             if (token != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -1303,7 +1295,7 @@ namespace MessengerApiClient
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, MessageSendListDTO body)
+        public System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, System.Collections.Generic.IEnumerable<MessageSendDTO> body)
         {
             return PostMultipleMessagesAsync(token, body, System.Threading.CancellationToken.None);
         }
@@ -1311,10 +1303,10 @@ namespace MessengerApiClient
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, MessageSendListDTO body, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostMultipleMessagesAsync(string token, System.Collections.Generic.IEnumerable<MessageSendDTO> body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Message/PostMultipleMessages?");
+            urlBuilder_.Append("api/Message/PostMultipleMessages?");
             if (token != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -1393,7 +1385,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("id");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Message/DeleteMessage/{id}");
+            urlBuilder_.Append("api/Message/DeleteMessage/{id}");
             urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
             var client_ = _httpClient;
@@ -1462,7 +1454,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<UserDetailsDTO> GetUserByNameAsync(string name, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/User/GetUserByName/{name}");
+            urlBuilder_.Append("api/User/GetUserByName/{name}");
             urlBuilder_.Replace("{name}", System.Uri.EscapeDataString(ConvertToString(name, System.Globalization.CultureInfo.InvariantCulture)));
 
             var client_ = _httpClient;
@@ -1540,7 +1532,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("id");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/User/GetUserById/{id}");
+            urlBuilder_.Append("api/User/GetUserById/{id}");
             urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
             var client_ = _httpClient;
@@ -1615,7 +1607,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<TokenDTO> RegisterUserAsync(UserRegisterDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/User/RegisterUser");
+            urlBuilder_.Append("api/User/RegisterUser");
 
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1692,7 +1684,7 @@ namespace MessengerApiClient
         public async System.Threading.Tasks.Task<TokenDTO> LoginUserAsync(UserLoginDTO body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/User/LoginUser");
+            urlBuilder_.Append("api/User/LoginUser");
 
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1772,7 +1764,7 @@ namespace MessengerApiClient
                 throw new System.ArgumentNullException("id");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/User/{id}?");
+            urlBuilder_.Append("api/User/{id}?");
             urlBuilder_.Replace("{id}", System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
             if (userToken != null)
             {
@@ -2005,6 +1997,9 @@ namespace MessengerApiClient
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.4.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class MessageReceiveDTO
     {
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long Id { get; set; }
+
         [Newtonsoft.Json.JsonProperty("sender", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public UserDTO Sender { get; set; }
 
@@ -2013,15 +2008,6 @@ namespace MessengerApiClient
 
         [Newtonsoft.Json.JsonProperty("cipherText", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] CipherText { get; set; }
-
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.4.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class MessageReceiveListDTO
-    {
-        [Newtonsoft.Json.JsonProperty("receiveMessageList", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<MessageReceiveDTO> ReceiveMessageList { get; set; }
 
 
     }
@@ -2037,15 +2023,6 @@ namespace MessengerApiClient
 
         [Newtonsoft.Json.JsonProperty("cipherText", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] CipherText { get; set; }
-
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.4.0 (Newtonsoft.Json v12.0.0.0)")]
-    public partial class MessageSendListDTO
-    {
-        [Newtonsoft.Json.JsonProperty("messageList", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<MessageSendDTO> MessageList { get; set; }
 
 
     }

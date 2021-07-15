@@ -37,9 +37,11 @@ namespace MessengerWPF
             // TODO Add exception Handler
             var httpClient = new HttpClient(new HttpClientHandler()
             {
-                UseDefaultCredentials = true
+                UseDefaultCredentials = true               
             });
-            container.RegisterInstance(new IMApiClient("https://localhost:44384/", httpClient));
+            httpClient.BaseAddress = new Uri("https://localhost:44384/");
+            container.RegisterInstance(httpClient);
+            //container.RegisterInstance(new IMApiClient("https://localhost:44384/", httpClient));
             container.RegisterSingleton<TokenAndIdProvider>();
             container.RegisterSingleton<SignalRClient>();
             container.RegisterSingleton<NavigationStore>();

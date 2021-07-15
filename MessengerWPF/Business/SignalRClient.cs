@@ -17,6 +17,9 @@ namespace MessengerWPF.Business
         private readonly MessagingLogic messagingLogic;
         private readonly ContactInitiationLogic contactInitiation;
 
+        public event Func<long, Task> OnNewMessages;
+        public event Func<long, Task> OnGroupChange;
+
         public SignalRClient(TokenAndIdProvider tokenAndId, ContactInitiationLogic contactInitiation, GroupManagementLogic groupManagement, MessagingLogic messagingLogic  ) //
         {
             this.tokenAndId = tokenAndId;
@@ -52,6 +55,7 @@ namespace MessengerWPF.Business
                             if (message.GroupId != null)
                             {
                                 groupManagement.UpdateGroupByIdAsync((long)message.GroupId).GetAwaiter().GetResult();
+                                OnGroupChange?.Invoke((long)message.GroupId);
                             }                            
                             break;
                         case MessageType.GroupDeleted:
@@ -62,6 +66,10 @@ namespace MessengerWPF.Business
                             break;
                         case MessageType.MessagePosted:
                             messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
+                            OnNewMessages?.Invoke(0/*message.GroupId*/);
+
+
+                            // 
                             break;
                     }
                 }
@@ -93,6 +101,8 @@ namespace MessengerWPF.Business
                 
                 messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
                 messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
+                OnGroupChange?.Invoke(0);
+                OnNewMessages?.Invoke(0/*message.GroupId*/);
             }
             catch (Exception ex )
             {
@@ -110,10 +120,12 @@ namespace MessengerWPF.Business
 
         private Task HubConnection_Reconnected(string arg)
         {
-            contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
-            groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
-            messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
-            messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
+            //contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
+            //groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
+            //messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
+            //messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
+            //OnGroupChange?.Invoke(0);
+            //OnNewMessages?.Invoke(0/*message.GroupId*/);
             return Task.CompletedTask;
         }
 

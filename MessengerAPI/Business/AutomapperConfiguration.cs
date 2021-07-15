@@ -30,7 +30,8 @@ namespace MessengerAPI.Business
                 cfg.CreateMap<Message, MessageReceiveDTO>()
                     .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender)); //.Id??
                 /// Mapping for User Controller
-                cfg.CreateMap<UserDTO, User>().ReverseMap();
+                cfg.CreateMap<UserDTO, User>();
+                cfg.CreateMap<User, UserDTO>();
                 
                 cfg.CreateMap<UserRegisterDTO, User>()
                     .ForMember(dest => dest.PublicKeys, opt => opt.MapFrom(src => src.PublicKeys));

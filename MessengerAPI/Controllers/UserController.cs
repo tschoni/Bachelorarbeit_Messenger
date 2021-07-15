@@ -44,7 +44,7 @@ namespace MessengerAPI.Controllers
         [HttpGet(nameof(GetUserById) + "/{id}")]
         public async Task<ActionResult<UserDetailsDTO>> GetUserById(long id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.Include(x => x.PublicKeys).FirstAsync(x => x.Id == id);
 
             if (user == null)
             {

@@ -67,10 +67,10 @@ namespace MessengerAPI.Controllers
         }*/
 
         [HttpGet(nameof(GetUsersReceivedMessages))]
-        public async Task<ActionResult<MessageReceiveListDTO>> GetUsersReceivedMessages(TokenDTO tokenDTO)
+        public async Task<ActionResult<List<MessageReceiveDTO>>> GetUsersReceivedMessages(TokenDTO tokenDTO)
         {
 
-            User user = await _context.Users.Include(x => x.ReceivedMessages).FirstAsync(x => x.Id == tokenDTO.Id);
+            User user = await _context.Users.Include(x => x.ReceivedMessages).ThenInclude(x => x.Sender).FirstAsync(x => x.Id == tokenDTO.Id);
             if (user.UserToken != tokenDTO.UserToken)
             {
                 return BadRequest("Not Authorized");
@@ -82,7 +82,7 @@ namespace MessengerAPI.Controllers
                 return NotFound();
             }
             // TODO delete Messages after
-            return mapper.Map<MessageReceiveListDTO>(messages);
+            return mapper.Map<List<MessageReceiveDTO>>(messages);
         }
 
         // POST: api/Message
@@ -107,10 +107,10 @@ namespace MessengerAPI.Controllers
 
         [HttpPost(nameof(PostMultipleMessages))]
         [ProducesResponseType(204)]
-        public async Task<ActionResult> PostMultipleMessages(MessageSendListDTO messageListDTO, string token)
+        public async Task<ActionResult> PostMultipleMessages(List<MessageSendDTO> messageListDTO, string token)
         {
             var recipients = new List<User>();
-            foreach(var messageDTO in messageListDTO.MessageList)
+            foreach(var messageDTO in messageListDTO)
             {
                 var message = mapper.Map<Message>(messageDTO);
                 message.Recipient = await _context.Users.FindAsync(messageDTO.Recipient.Id);

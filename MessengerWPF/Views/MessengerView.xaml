@@ -9,21 +9,47 @@
     <UserControl.Resources>
         <ResourceDictionary Source="ScrollBarStylesDictionary.xaml" ></ResourceDictionary>
     </UserControl.Resources>
-    <!--Title="Messenger" Height="450" Width="800"-->
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="270"/>
             <ColumnDefinition Width="*"/>
 
         </Grid.ColumnDefinitions>
-
         <Grid Grid.Column="1" Background="#FFE4E4E4">
-            <StackPanel Orientation="Horizontal" Height="55" VerticalAlignment="Top" Background="Azure">
-                <TextBlock x:Name="ChatNameTextBlock" Text="{Binding Path= SelectedGroup.Name}"  FontWeight="Bold" Foreground="DarkCyan"  FontSize="20" VerticalAlignment="Center" Margin="10"/>
-            </StackPanel>
-            <StackPanel Margin="0 70" VerticalAlignment="Bottom">
-                <ListView x:Name="ChatView" Background="#FFE4E4E4" BorderBrush="#FFE4E4E4"
-                ItemsSource="{Binding Path= SelectedGroup.Messages}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Background="Azure">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" x:Name="ChatNameTextBlock" Text="{Binding Path= SelectedGroup.Name}"  FontWeight="Bold" Foreground="DarkCyan"  FontSize="20" VerticalAlignment="Center" Margin="10"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Height="55" VerticalAlignment="Top" >
+                    <Button x:Name="AddMemberButton" Command="{Binding Path=AddMemberCommand}" Grid.Column="1" Width="33" Height="33" Background="Azure" BorderBrush="White" Margin="0,0" HorizontalAlignment="Right">
+                        <Border Width="29" Height="29" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
+                            <TextBlock Text="+&#128100;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="DarkCyan" FontFamily="Impact"/>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="2" ShadowDepth="1" Color="DarkCyan"/>
+                            </Border.Effect>
+                        </Border>
+                    </Button>
+                    <Button x:Name="RemoveMemberButton" Command="{Binding Path=RemoveMemberCommand}" Grid.Column="1" Width="33" Height="33" Background="Azure" BorderBrush="White" Margin="5,0" HorizontalAlignment="Right">
+                        <Border Width="29" Height="29" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
+                            <TextBlock Text="-&#128100;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="DarkCyan" FontFamily="Impact"/>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="2" ShadowDepth="1" Color="DarkCyan"/>
+                            </Border.Effect>
+                        </Border>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <!--&#128119; Für Admins? -->
+            <ScrollViewer Grid.Row="1" Style="{DynamicResource FavsScrollViewer}">
+                <ListView x:Name="ChatView" Background="#FFE4E4E4" BorderBrush="#FFE4E4E4" VerticalAlignment="Bottom"
+                ItemsSource="{Binding Path= GroupMessages, UpdateSourceTrigger=PropertyChanged}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Border  Margin="5" Width="auto" Height="auto" CornerRadius="15" BorderBrush="DarkCyan" BorderThickness="0.5" HorizontalAlignment="Left" Background="White">
@@ -39,15 +65,14 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-
-            </StackPanel>
-            <Border Background="Azure" VerticalAlignment="Bottom">
+            </ScrollViewer>
+            <Border Grid.Row="2" Background="Azure" VerticalAlignment="Bottom">
                 <Grid Margin="0 10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="60"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="MessageInputTextbox" Text="{Binding Path= MessageInput, Mode=TwoWay}"  Grid.Column="0" BorderBrush="DarkCyan"  MaxHeight="80" TextWrapping="Wrap" Margin="10,5,0,5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    <TextBox x:Name="MessageInputTextbox" Text="{Binding Path= MessageInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Grid.Column="0" BorderBrush="DarkCyan"  MaxHeight="80" TextWrapping="Wrap" Margin="10,5,0,5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
                     <Button x:Name="SendButton" Command="{Binding Path= SendMessageCommand}" Grid.Column="1" Width="39" Height="39" Background="Azure" BorderBrush="White" Margin="5" HorizontalAlignment="Center">
                         <Border Width="35" Height="35" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
                             <TextBlock Text="&#10148;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Foreground="DarkCyan" FontFamily="Impact"/>
@@ -66,7 +91,7 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Background="Azure">
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                    <TextBox Text="{Binding Path=ContactName, Mode=TwoWay}" Width="200" Margin="20, 10, 0, 10"  Foreground="Black" BorderBrush="DarkCyan"/>
+                    <TextBox Text="{Binding Path=ContactName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="20, 10, 0, 10"  Foreground="Black" BorderBrush="DarkCyan"/>
                     <Button x:Name="AddContactButton" Command="{Binding Path=AddContactCommand}" Grid.Column="1" Width="33" Height="33" Background="Azure" BorderBrush="White" Margin="10,0" HorizontalAlignment="Right">
                         <Border Width="29" Height="29" CornerRadius="25" BorderBrush="DarkCyan" BorderThickness="2" HorizontalAlignment="Center" Background="Azure">
                             <TextBlock Text="+&#128100; " HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Foreground="DarkCyan" FontFamily="Impact"/>
@@ -88,7 +113,6 @@
                         </Border.Effect>
                     </Border>
                 </Button>
-
             </StackPanel>-->
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center">
 
@@ -103,7 +127,7 @@
                 </StackPanel>
             </StackPanel>
             <ScrollViewer Grid.Row="1" Style="{DynamicResource FavsScrollViewer}" Margin="0,5">
-                <ListView x:Name="GroupListView" BorderBrush="Azure" ItemsSource="{Binding Path = Groups}" SelectedItem="{Binding Path= SelectedGroup, Mode=TwoWay}">
+                <ListView x:Name="GroupListView" BorderBrush="Azure" ItemsSource="{Binding Path = Groups, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path= SelectedGroup, Mode=TwoWay}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
 
@@ -117,23 +141,5 @@
                 </ListView>
             </ScrollViewer>
         </Grid>
-        
-
-            <!--<ListView x:Name="GroupListView" BorderBrush="Azure"
-                ItemsSource="{Binding Path = Groups}" SelectedItem="{Binding Path= SelectedGroup, Mode=TwoWay}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Button BorderBrush="DarkCyan" Background="White" Height="40">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Name}" Margin="15,10,0,10" Foreground="DarkCyan" FontWeight="Bold"  HorizontalAlignment="Left" Width="220"/>
-                                <TextBlock Text="{Binding }" Foreground="DarkCyan" FontWeight="Bold" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>-->
-        
-
     </Grid>
 </UserControl>
-

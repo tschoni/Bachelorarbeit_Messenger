@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MessengerWPF.Views.CreateGroupView"
+﻿<UserControl x:Class="MessengerWPF.Views.ChangeMembersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -16,16 +16,11 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Create Group" VerticalAlignment="Center" Margin="10" Foreground="Teal" FontSize="15" FontWeight="Bold"/>
-        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="10" HorizontalAlignment="Left" VerticalAlignment="Center" >
-            <TextBlock Text="Enter Group Name" FontSize="13" FontWeight="DemiBold" Foreground="DarkCyan"/>
-            <TextBox Text="{Binding Path=GroupName, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" HorizontalAlignment="Left" TextWrapping="Wrap" Width="245"/>
-        </StackPanel>
-        <ScrollViewer Grid.Column="0" Grid.Row="2"  Style="{DynamicResource FavsScrollViewer}">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding PursuedAction}" VerticalAlignment="Center" Margin="10" Foreground="Teal" FontSize="15" FontWeight="Bold"/>
+        <ScrollViewer Grid.Column="0" Grid.Row="1"  Style="{DynamicResource FavsScrollViewer}">
             <ListView x:Name="GroupListView" BorderBrush="Azure"
                 ItemsSource="{Binding Path = Contacts}" local:SelectedItemsBahavior.SelectedItems="{Binding SelectedItems}">
                 <!--{Binding, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}} Command="{Binding Path=AddContactToListCommand}SelectedItem="{Binding Path= SelectedGroup, Mode=TwoWay}" DataContext="{Binding CreateGroupViewModel}"-->
@@ -36,16 +31,17 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Name}" Margin="10,10,10,10" Foreground="DarkCyan" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Left" Width="200"/>
                             <CheckBox IsChecked="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsSelected}" VerticalAlignment="Center"/>
-                            <!--<CheckBox IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, UpdateSourceTrigger=PropertyChanged}"   Command="{Binding DataContext.AddContactToListCommand ,RelativeSource={RelativeSource AncestorType=UserControl, AncestorLevel=1 }}" VerticalAlignment="Center">/--><!-- FindAncestor, CommandParameter="{Binding ElementName=GroupListView, Path=SelectedItem}" -->
-                           
+                            <!--<CheckBox IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, UpdateSourceTrigger=PropertyChanged}"   Command="{Binding DataContext.AddContactToListCommand ,RelativeSource={RelativeSource AncestorType=UserControl, AncestorLevel=1 }}" VerticalAlignment="Center">/-->
+                            <!-- FindAncestor, CommandParameter="{Binding ElementName=GroupListView, Path=SelectedItem}" -->
+
                         </StackPanel>
 
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" >
-            <Button Content=" Submit Group " Background="Azure" BorderBrush="DarkCyan" Margin="15" Command="{Binding Path=SubmitGroupCommand}"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" >
+            <Button Content=" Submit " Background="Azure" BorderBrush="DarkCyan" Margin="15" Command="{Binding Path=SubmitGroupCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

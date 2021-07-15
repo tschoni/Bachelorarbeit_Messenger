@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MessengerWPF.ViewModels
 {
-    public class MessengerViewModel : ViewModelBase
+    public class MessengerViewModel : ViewModelBase, IDisposable
     {
         private Group selectedGroup;
         private ObservableCollection<Group> groups = new ObservableCollection<Group>();
@@ -25,7 +25,7 @@ namespace MessengerWPF.ViewModels
         private string messageInput;
         private string contactName;
         private readonly MessagingLogic messagingLogic;
-        private readonly GroupManagementLogic groupManagementLogic; // vllt unnötig
+        private readonly GroupManagementLogic groupManagementLogic;
         private readonly SignalRClient signalRClient;
         private readonly NavigationStore navigationStore;
         private readonly IMClientDbContext iMClientDb;
@@ -35,8 +35,6 @@ namespace MessengerWPF.ViewModels
         public MyICommand SendMessageCommand { get; set; }
         public MyICommand AddContactCommand { get; set; }
         public MyICommand AddGroupCommand { get; set; }
-
-        //public MyICommand SelectGroupCommand { get; set; }
 
         public MessengerViewModel(MessagingLogic messagingLogic, 
             ContactInitiationLogic contactInitiationLogic, 
@@ -54,7 +52,6 @@ namespace MessengerWPF.ViewModels
             this.tokenAndId = tokenAndId;
             this.contactInitiationLogic = contactInitiationLogic;
 
-
             SendMessageCommand = new MyICommand(async () =>
             {
                 await OnSendMessage();
@@ -69,24 +66,20 @@ namespace MessengerWPF.ViewModels
 
             GetGroups().GetAwaiter();
 
-            //SelectGroupCommand = new MyICommand(OnSelectGroup);
+            this.signalRClient.OnNewMessages += SignalRClient_OnNewMessages;
+            this.signalRClient.OnGroupChange += SignalRClient_OnGroupChange;
+        }
 
-            /*var alice = new User() { Name = "Alice", Id = 1 };
-            alice.Keys = KeyGenerationLogic.GenerateUserKeyList(alice);
-            var alSigKey = (SignedKey)alice.Keys.Find(x => x.KeyType == KeyType.SignedKeyPublic);
-            var alIdKey = alice.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPublic);
-            if (KeyGenerationLogic.VerifySignedKey(alSigKey.Signature, alSigKey.KeyBytes, alIdKey.KeyBytes))
-            {
-                SearchInput = "valid";
-            }
-            var bob = new User() { Name = "Bob", Id = 1 };
-            bob.Keys = KeyGenerationLogic.GenerateUserKeyList(bob);
-            var aliceEph = KeyGenerationLogic.GenerateKeyPair( KeyGenerationLogic.CreateCngKey());
-            var sharedKeyA = KeyGenerationLogic.GenerateMasterKeyAsInitiator(alice.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPrivate), aliceEph.PrivateKey, new MessengerApiClient.PublicKeyDTO() { KeyBytes = bob.Keys.Find(x => x.KeyType == KeyType.SignedKeyPublic).KeyBytes }, new MessengerApiClient.PublicKeyDTO() { KeyBytes = bob.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPublic).KeyBytes }, bob);
-            var sharedKeyB = KeyGenerationLogic.GenerateMasterKeyAsReactor(bob.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPrivate), bob.Keys.Find(x => x.KeyType == KeyType.SignedKeyPrivate), new MessengerApiClient.EphemKeyDTO() { KeyBytes = aliceEph.PublicKey }, new MessengerApiClient.PublicKeyDTO() { KeyBytes = alice.Keys.Find(x => x.KeyType == KeyType.IdentityKeyPublic).KeyBytes }, alice);
-            MessageInput = "Alice Master Key: " + Convert.ToBase64String(sharedKeyA.KeyBytes) + "\n";
-            MessageInput += "Bob Master Key: " + Convert.ToBase64String(sharedKeyB.KeyBytes);*/
+        private Task SignalRClient_OnGroupChange(long arg)
+        {
+            GetGroups().GetAwaiter();
+            return Task.CompletedTask;
+        }
 
+        private Task SignalRClient_OnNewMessages(long arg)
+        {
+            GetMessages();
+            return Task.CompletedTask;
         }
 
         private ObservableCollection<GroupMessage> groupMessages = new ObservableCollection<GroupMessage>();
@@ -101,7 +94,7 @@ namespace MessengerWPF.ViewModels
         }
 
 
-        private bool CanAddContact() => ContactName != String.Empty;
+        private bool CanAddContact() => ContactName != null;
 
         private async Task OnAddContact()
         {
@@ -146,6 +139,7 @@ namespace MessengerWPF.ViewModels
         private async Task OnSendMessage()
         {
             await messagingLogic.SendMessageAsync(MessageInput, SelectedGroup, signalRClient);
+            GetMessages();
         }
 
         public string MessageInput
@@ -169,8 +163,6 @@ namespace MessengerWPF.ViewModels
             }
         }
 
-  
-
         //public ObservableCollection<GroupMessage> GroupMessages
         //{
         //    get { return groupMessages; }
@@ -193,8 +185,14 @@ namespace MessengerWPF.ViewModels
         }
         public void GetMessages()
         {
-            var messages = iMClientDb.GroupTextMessages.Where(x => x.Group.Id == selectedGroup.Id).ToList();
+            if(SelectedGroup == null) { return; }
+            var messages = iMClientDb.GroupTextMessages.Include(x => x.Sender).Where(x => x.Group.Id == SelectedGroup.Id).ToList();
             GroupMessages = new ObservableCollection<GroupMessage>(messages);
+        }
+
+        public void Dispose()
+        {
+            signalRClient.OnNewMessages -= SignalRClient_OnNewMessages;
         }
 
         public ObservableCollection<Group> Groups

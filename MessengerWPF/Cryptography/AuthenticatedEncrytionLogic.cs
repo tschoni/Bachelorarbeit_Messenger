@@ -122,7 +122,7 @@ namespace MessengerWPF.Cryptography
                 {
                     return null;
                 }
-
+                
                 Array.Copy(encryptedMessage, encryptedMessage.Length - sentTag.Length, sentTag, 0, sentTag.Length);
 
                 // Compare Tag with constant time comparison

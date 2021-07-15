@@ -52,8 +52,14 @@ namespace MessengerWPF.Business
             if (group == null)
             {
                 group = new Group() { Id = id, Name = groupDTO.Name, Members = new List<User>(), Admins = new List<User>(), Messages = new List<GroupMessage>() };
+                group = await UpdateGroupAsync(group, groupDTO);
+                dbContext.Groups.Add(group);
             }
-            group = await UpdateGroupAsync(group, groupDTO);
+            else
+            {
+                group = await UpdateGroupAsync(group, groupDTO);
+                dbContext.Groups.Update(group);
+            }
             await dbContext.SaveChangesAsync();
         }
 
@@ -62,17 +68,18 @@ namespace MessengerWPF.Business
             var members = new List<User>();
             foreach (var memberDTO in groupDTO.Members)
             {
-                var contact = await dbContext.Users.FindAsync(memberDTO.Id);
+                var contact = await dbContext.Users.Include(x=> x.Groups).Include(x => x.AdminOfGroups).FirstAsync(x => x.Id == memberDTO.Id);
                 if (contact == null)
                 {
                     await contactInitiation.InitiateKeyExchangeByIdAsync(memberDTO.Id);
+                    contact = await dbContext.Users.Include(x => x.Groups).Include(x => x.AdminOfGroups).FirstAsync(x => x.Id == memberDTO.Id);
                 }
                 members.Add(contact);
             }
             var admins = new List<User>();
             foreach (var adminDTO in groupDTO.Admins)
             {
-                admins.Add(await dbContext.Users.FindAsync(adminDTO.Id));
+                admins.Add(await dbContext.Users.Include(x => x.Groups).Include(x => x.AdminOfGroups).FirstAsync(x => x.Id == adminDTO.Id));
             }
             group.Name = groupDTO.Name;
             group.Members = members;

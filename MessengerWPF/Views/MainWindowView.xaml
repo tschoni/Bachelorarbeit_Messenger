@@ -19,6 +19,9 @@
                 <DataTemplate DataType="{x:Type viewModels:CreateGroupViewModel}">
                     <local:CreateGroupView/>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type viewModels:ChangeMembersViewModel}">
+                    <local:ChangeMembersView/>
+                </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
     </Grid>
