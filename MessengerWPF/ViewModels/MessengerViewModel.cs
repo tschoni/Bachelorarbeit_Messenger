@@ -35,6 +35,8 @@ namespace MessengerWPF.ViewModels
         public MyICommand SendMessageCommand { get; set; }
         public MyICommand AddContactCommand { get; set; }
         public MyICommand AddGroupCommand { get; set; }
+        public MyICommand AddMemberCommand { get; set; }
+        public MyICommand RemoveMemberCommand { get; set; }
 
         public MessengerViewModel(MessagingLogic messagingLogic, 
             ContactInitiationLogic contactInitiationLogic, 
@@ -63,11 +65,37 @@ namespace MessengerWPF.ViewModels
             AddGroupCommand = new MyICommand(async () => {
                 await OnAddGroup();
             }, CanAddGroup);
+            AddMemberCommand = new MyICommand(async () =>
+            {
+                await OnAddMember();
+            }, CanAddMember);
+            RemoveMemberCommand = new MyICommand(async () =>
+            {
+                await OnRemoveMember();
+            }, CanRemoveMember);
 
             GetGroups().GetAwaiter();
 
             this.signalRClient.OnNewMessages += SignalRClient_OnNewMessages;
             this.signalRClient.OnGroupChange += SignalRClient_OnGroupChange;
+        }
+
+        private bool CanRemoveMember() => SelectedGroup != null;
+
+
+        private async Task OnRemoveMember()
+        {
+            var me = await iMClientDb.Users.Include(x => x.Contacts).FirstAsync(x => x.Id == tokenAndId.Id);
+            navigationStore.CurrentViewModel = new ChangeMembersViewModel(this, navigationStore, SelectedGroup, me, false, true, groupManagementLogic);
+        }
+
+        private bool CanAddMember() => SelectedGroup != null;
+
+
+        private async Task OnAddMember()
+        {
+            var me = await iMClientDb.Users.Include(x => x.Contacts).FirstAsync(x => x.Id == tokenAndId.Id);
+            navigationStore.CurrentViewModel = new ChangeMembersViewModel(this, navigationStore, SelectedGroup, me, true, true, groupManagementLogic);
         }
 
         private Task SignalRClient_OnGroupChange(long arg)
@@ -175,7 +203,9 @@ namespace MessengerWPF.ViewModels
         public async Task GetGroups()
         {
 
-            var me = await iMClientDb.Users.Include(x => x.Groups).FirstAsync(x => x.Id == tokenAndId.Id);
+            var me = await iMClientDb.Users.Include(x => x.Groups).ThenInclude(x => x.Members)
+                                           .Include( x => x.Groups).ThenInclude(x => x.Admins)
+                                           .FirstAsync(x => x.Id == tokenAndId.Id);
             if (me == null || me.Groups == null)
             {
                 return;
@@ -214,6 +244,8 @@ namespace MessengerWPF.ViewModels
                 GetMessages();
                // RaisePropertyChanged(nameof(GroupMessages));
                 SendMessageCommand.RaiseCanExecuteChanged();
+                AddMemberCommand.RaiseCanExecuteChanged();
+                RemoveMemberCommand.RaiseCanExecuteChanged();
             }
         }
 

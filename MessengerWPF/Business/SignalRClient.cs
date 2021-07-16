@@ -102,12 +102,12 @@ namespace MessengerWPF.Business
                 messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
                 messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
                 OnGroupChange?.Invoke(0);
-                OnNewMessages?.Invoke(0/*message.GroupId*/);
+                OnNewMessages?.Invoke(0);/*message.GroupId*/
             }
             catch (Exception ex )
             {
 
-                throw;
+                throw ;
             }
 
             return Task.CompletedTask;
@@ -120,12 +120,12 @@ namespace MessengerWPF.Business
 
         private Task HubConnection_Reconnected(string arg)
         {
-            //contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
-            //groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
-            //messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
-            //messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
-            //OnGroupChange?.Invoke(0);
-            //OnNewMessages?.Invoke(0/*message.GroupId*/);
+            contactInitiation.ReactOnKeyExchangeInitiationAsync().GetAwaiter().GetResult();
+            groupManagement.UpdateAllGroupAsync().GetAwaiter().GetResult();
+            messagingLogic.RetreiveMessagesAsync().GetAwaiter().GetResult();
+            messagingLogic.SendPendingMessagesAsync().GetAwaiter().GetResult();
+            OnGroupChange?.Invoke(0);
+            OnNewMessages?.Invoke(0);/*message.GroupId*/
             return Task.CompletedTask;
         }
 

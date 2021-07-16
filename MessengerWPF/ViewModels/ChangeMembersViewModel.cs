@@ -42,7 +42,7 @@ namespace MessengerWPF.ViewModels
             this.add = add;
             this.member = member;
             this.groupManagement = groupManagement;
-            Members = new ObservableCollection<User>(selectedGroup.Members);
+            SetContactSelection(selectedGroup, me);
         }
         public string PursuedAction
         {
@@ -69,10 +69,16 @@ namespace MessengerWPF.ViewModels
             switch (add, member)
             {
                 case (true, true):
-                    Members = new ObservableCollection<User>(me.Contacts);
+                    var contacts = new List<User>(me.Contacts);
+                    IEnumerable<User> common = contacts.Intersect(group.Members).ToList();                                       
+                    contacts.RemoveAll(x => common.Contains(x));
+                    Members = new ObservableCollection<User>(contacts);
                     PursuedAction = "Add Members";
                     break;
                 case (true, false):
+                    var members = new List<User>(me.Contacts);
+                    IEnumerable<User> common2 = members.Intersect(group.Admins).ToList();
+                    members.RemoveAll(x => common2.Contains(x));
                     Members = new ObservableCollection<User>(group.Members);
                     PursuedAction = "Add Admins";
                     break;
@@ -86,7 +92,7 @@ namespace MessengerWPF.ViewModels
                     break;
             }
         }
-        private bool CanSubmit() => SelectedItems.Count >= 1;
+        private bool CanSubmit() => true;
 
         private async Task OnSubmit()
         {

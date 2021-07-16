@@ -19,10 +19,10 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding PursuedAction}" VerticalAlignment="Center" Margin="10" Foreground="Teal" FontSize="15" FontWeight="Bold"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path=PursuedAction}" VerticalAlignment="Center" Margin="10" Foreground="Teal" FontSize="15" FontWeight="Bold"/>
         <ScrollViewer Grid.Column="0" Grid.Row="1"  Style="{DynamicResource FavsScrollViewer}">
             <ListView x:Name="GroupListView" BorderBrush="Azure"
-                ItemsSource="{Binding Path = Contacts}" local:SelectedItemsBahavior.SelectedItems="{Binding SelectedItems}">
+                ItemsSource="{Binding Path = Members}" local:SelectedItemsBahavior.SelectedItems="{Binding Path=SelectedItems}">
                 <!--{Binding, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}} Command="{Binding Path=AddContactToListCommand}SelectedItem="{Binding Path= SelectedGroup, Mode=TwoWay}" DataContext="{Binding CreateGroupViewModel}"-->
 
                 <ListView.ItemTemplate>
@@ -41,7 +41,7 @@
             </ListView>
         </ScrollViewer>
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" >
-            <Button Content=" Submit " Background="Azure" BorderBrush="DarkCyan" Margin="15" Command="{Binding Path=SubmitGroupCommand}"/>
+            <Button Content=" Submit " Background="Azure" BorderBrush="DarkCyan" Margin="15" Command="{Binding Path=SubmitCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

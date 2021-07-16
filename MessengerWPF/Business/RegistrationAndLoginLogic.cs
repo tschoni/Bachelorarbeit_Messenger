@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using MessengerWPF.Cryptography;
+using System.Net.Http;
 
 namespace MessengerWPF.Business
 {
@@ -73,6 +74,10 @@ namespace MessengerWPF.Business
                 }*/
 
                 return true;
+            }
+            catch (HttpRequestException)
+            {
+                return false;
             }
             catch(ApiException)
             {

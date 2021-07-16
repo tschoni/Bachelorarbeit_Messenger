@@ -60,6 +60,8 @@ namespace MessengerWPF
 
         }
 
+
+
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             try

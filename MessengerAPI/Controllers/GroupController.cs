@@ -118,7 +118,7 @@ namespace MessengerAPI.Controllers
         [HttpPost(nameof(AddGroupMember) + "/{groupId}/{userId}")]
         public async Task<ActionResult<GroupDetailsDTO>> AddGroupMember(long groupId, long userId, string token)
         {
-            var group = await _context.Groups.Include(x => x.Admins).Include( x => x.Members).FirstAsync(x => x.Id == groupId);
+            var group = await _context.Groups.Include(x => x.Admins).Include(x => x.Members).FirstAsync(x => x.Id == groupId);
             var user = await _context.Users.FindAsync(userId);
             if (group == null || user == null)
             {
@@ -172,10 +172,10 @@ namespace MessengerAPI.Controllers
             {
                 return BadRequest("Not authorized.");
             }
-            if (group.Members.Count <= 1)
-            {
-                return BadRequest("Group must have at least 1 member.");
-            }
+            //if (group.Members.Count <= 1)
+            //{
+            //    return BadRequest("Group must have at least 1 member.");
+            //}
             if (!group.Admins.Contains(user))
             {
                 group.Admins.Add(user);
